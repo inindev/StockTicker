@@ -9,9 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.window.layout.DisplayFeature
-import com.github.premnirmal.ticker.detail.QuoteDetailScreen
 import com.github.premnirmal.ticker.home.HomeListDetail
-import com.github.premnirmal.ticker.network.data.Quote
 
 @Composable
 fun RootNavigationGraphHost(
@@ -22,24 +20,14 @@ fun RootNavigationGraphHost(
 ) {
     val viewModelStoreOwner = rememberViewModelStoreOwner()
     CompositionLocalProvider(LocalNavGraphViewModelStoreOwner provides viewModelStoreOwner) {
-        RootNavigationGraph(
-            navHostController = navHostController,
-            homeContent = {
-                HomeListDetail(
-                    rootNavController = navHostController,
-                    windowWidthSizeClass = windowWidthSizeClass,
-                    windowHeightSizeClass = windowHeightSizeClass,
-                    displayFeatures = displayFeatures
-                )
-            },
-            quoteDetailContent = { symbol ->
-                QuoteDetailScreen(
-                    widthSizeClass = windowWidthSizeClass,
-                    contentType = null,
-                    displayFeatures = displayFeatures,
-                    quote = Quote(symbol = symbol)
-                )
-            }
+        // [HomeListDetail] now owns both the persistent navigation chrome (bottom bar / rail) and the
+        // root navigation graph it wraps (home tabs + quote detail), so the bar stays visible when a
+        // stock detail opens.
+        HomeListDetail(
+            rootNavController = navHostController,
+            windowWidthSizeClass = windowWidthSizeClass,
+            windowHeightSizeClass = windowHeightSizeClass,
+            displayFeatures = displayFeatures
         )
     }
 }

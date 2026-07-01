@@ -1,5 +1,6 @@
 package com.github.premnirmal.ticker.home
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -7,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -14,6 +16,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
+import com.github.premnirmal.ticker.detail.QuoteDetailScreen
+import com.github.premnirmal.ticker.navigation.Graph
 import com.github.premnirmal.ticker.navigation.HomeBottomNavDestination
 import com.github.premnirmal.ticker.navigation.HomeNavHostWrapper
 import com.github.premnirmal.ticker.navigation.HomeNavigationActions
@@ -21,7 +25,9 @@ import com.github.premnirmal.ticker.navigation.HomeRoute
 import com.github.premnirmal.ticker.navigation.HomeScaffold
 import com.github.premnirmal.ticker.navigation.LocalNavGraphViewModelStoreOwner
 import com.github.premnirmal.ticker.navigation.NavigationViewModel
+import com.github.premnirmal.ticker.navigation.RootNavigationGraph
 import com.github.premnirmal.ticker.navigation.calculateContentAndNavigationType
+import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.ticker.ui.LocalAppMessaging
 import com.github.premnirmal.ticker.ui.LocalContentType
 import com.github.premnirmal.ticker.ui.NavigationContentPosition
@@ -121,12 +127,22 @@ private fun HomeListDetailNavigationWrapper(
         "No ViewModelStoreOwner was provided via LocalNavGraphViewModelStoreOwner"
     }
     val navigationViewModel = viewModel<NavigationViewModel>(viewModelStoreOwner)
-    val navController = rememberNavController()
-    val homeNavigationActions = remember(navController) {
-        HomeNavigationActions(navController, navigationViewModel)
+    val homeNavController = rememberNavController()
+    val homeNavigationActions = remember(homeNavController) {
+        HomeNavigationActions(homeNavController, navigationViewModel)
     }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val selectedDestination = navBackStackEntry?.destination?.route ?: HomeRoute.Watchlist.route
+
+    // The bottom bar / rail is drawn once here, wrapping the *root* graph (home tabs + quote detail),
+    // so it stays visible when a stock detail opens as a root destination. When the root is showing
+    // detail, no tab is highlighted; tapping any tab returns to home and selects it.
+    val rootBackStackEntry by rootNavController.currentBackStackEntryAsState()
+    val onHome = rootBackStackEntry?.destination?.route == Graph.HOME
+    val homeBackStackEntry by homeNavController.currentBackStackEntryAsState()
+    val selectedDestination = if (onHome) {
+        homeBackStackEntry?.destination?.route ?: HomeRoute.Watchlist.route
+    } else {
+        ""
+    }
 
     HomeScaffold(
         navigationType = navigationType,
@@ -134,15 +150,35 @@ private fun HomeListDetailNavigationWrapper(
         destinations = destinations,
         navigationContentPosition = navigationContentPosition,
         snackbarHostState = LocalAppMessaging.current.snackbarHostState,
-        navigateToTopLevelDestination = { homeNavigationActions.navigateTo(it) },
+        navigateToTopLevelDestination = { destination ->
+            if (!onHome) {
+                rootNavController.popBackStack(Graph.HOME, inclusive = false)
+            }
+            homeNavigationActions.navigateTo(destination)
+        },
         navHost = { modifier ->
-            HomeNavHostWrapper(
-                rootNavController = rootNavController,
-                navController = navController,
-                widthSizeClass = widthSizeClass,
-                displayFeatures = displayFeatures,
+            RootNavigationGraph(
+                navHostController = rootNavController,
                 modifier = modifier,
                 disableTransitions = navigationType == NavigationType.NAVIGATION_RAIL,
+                homeContent = {
+                    HomeNavHostWrapper(
+                        rootNavController = rootNavController,
+                        navController = homeNavController,
+                        widthSizeClass = widthSizeClass,
+                        displayFeatures = displayFeatures,
+                        modifier = Modifier.fillMaxSize(),
+                        disableTransitions = navigationType == NavigationType.NAVIGATION_RAIL,
+                    )
+                },
+                quoteDetailContent = { symbol ->
+                    QuoteDetailScreen(
+                        widthSizeClass = widthSizeClass,
+                        contentType = null,
+                        displayFeatures = displayFeatures,
+                        quote = Quote(symbol = symbol),
+                    )
+                },
             )
         }
     )

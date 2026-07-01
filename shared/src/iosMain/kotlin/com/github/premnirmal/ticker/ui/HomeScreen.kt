@@ -1,6 +1,7 @@
 package com.github.premnirmal.ticker.ui
 
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -11,9 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -66,31 +66,10 @@ fun HomeScreen() {
         HomeKoin.stocksProvider.schedule()
         onboardingController.showIfFirstRun()
     }
-    RootNavigationGraph(
-        navHostController = rootNavController,
-        disableTransitions = isWideLayout(),
-        homeContent = { HomeContent(rootNavController, onboardingController) },
-        quoteDetailContent = { symbol ->
-            QuoteDetailScreen(
-                symbol = symbol,
-                onBack = { rootNavController.popBackStack() }
-            )
-        }
-    )
+    // The home navigation chrome (bottom bar / rail) wraps the root graph inside [HomeContent], so it
+    // stays visible when a stock detail opens as a root destination.
+    HomeContent(rootNavController, onboardingController)
     OnboardingTutorial(onboardingController)
-}
-
-/**
- * True when the current window is wide enough to use the dual-pane / navigation-rail layout (iPad or
- * a wide Split View). Used to suppress the root navigation slide animation, which looks out of place
- * next to the static side navigation rail.
- */
-@Composable
-private fun isWideLayout(): Boolean {
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
-    val widthDp = with(density) { windowInfo.containerSize.width.toDp() }
-    return iosContentAndNavigationType(widthDp).second == ContentType.DUAL_PANE
 }
 
 @Composable
@@ -145,8 +124,17 @@ private fun HomeContent(
         )
     )
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val selectedDestination = navBackStackEntry?.destination?.route ?: HomeRoute.Watchlist.route
+    // The bar wraps the *root* graph (home tabs + quote detail), so it stays visible when a stock
+    // detail opens as a root destination. On detail no tab is highlighted; tapping a tab returns to
+    // home and selects it.
+    val rootBackStackEntry by rootNavController.currentBackStackEntryAsState()
+    val onHome = rootBackStackEntry?.destination?.route == Graph.HOME
+    val homeBackStackEntry by navController.currentBackStackEntryAsState()
+    val selectedDestination = if (onHome) {
+        homeBackStackEntry?.destination?.route ?: HomeRoute.Watchlist.route
+    } else {
+        ""
+    }
 
     CompositionLocalProvider(LocalNavGraphViewModelStoreOwner provides viewModelStoreOwner) {
         BoxWithConstraints {
@@ -167,44 +155,60 @@ private fun HomeContent(
                 navigationContentPosition = navigationContentPosition,
                 snackbarHostState = snackbarHostState,
                 navigateToTopLevelDestination = { destination ->
+                    if (!onHome) {
+                        rootNavController.popBackStack(Graph.HOME, inclusive = false)
+                    }
                     homeNavigationActions.navigateTo(destination)
                 },
                 navHost = { modifier ->
-                    HomeNavHost(
-                        navController = navController,
+                    RootNavigationGraph(
+                        navHostController = rootNavController,
                         modifier = modifier,
                         disableTransitions = navigationType == NavigationType.NAVIGATION_RAIL,
-                        watchlist = {
-                            WatchlistPane(
-                                contentType = contentType,
-                                onQuoteClick = { quote ->
-                                    rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                        homeContent = {
+                            HomeNavHost(
+                                navController = navController,
+                                modifier = Modifier.fillMaxSize(),
+                                disableTransitions = navigationType == NavigationType.NAVIGATION_RAIL,
+                                watchlist = {
+                                    WatchlistPane(
+                                        contentType = contentType,
+                                        onQuoteClick = { quote ->
+                                            rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                                        }
+                                    )
+                                },
+                                trending = {
+                                    TrendingScreen(
+                                        onQuoteClick = { quote ->
+                                            rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                                        }
+                                    )
+                                },
+                                search = {
+                                    SearchScreen(
+                                        onQuoteClick = { quote ->
+                                            rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                                        }
+                                    )
+                                },
+                                widgets = {},
+                                settings = {
+                                    SettingsScreen(
+                                        onWhatsNew = { whatsNewController.show(iosVersionCode()) },
+                                        onTutorial = { onboardingController.show() },
+                                    )
                                 }
                             )
                         },
-                    trending = {
-                        TrendingScreen(
-                            onQuoteClick = { quote ->
-                                rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
-                            }
-                        )
-                    },
-                    search = {
-                        SearchScreen(
-                            onQuoteClick = { quote ->
-                                rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
-                            }
-                        )
-                    },
-                    widgets = {},
-                    settings = {
-                        SettingsScreen(
-                            onWhatsNew = { whatsNewController.show(iosVersionCode()) },
-                            onTutorial = { onboardingController.show() },
-                        )
-                    }
-                )
-            }
+                        quoteDetailContent = { symbol ->
+                            QuoteDetailScreen(
+                                symbol = symbol,
+                                onBack = { rootNavController.popBackStack() }
+                            )
+                        },
+                    )
+                }
             )
         }
     }
