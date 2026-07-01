@@ -28,7 +28,6 @@ import com.github.premnirmal.ticker.ui.NavigationContentPosition
 import com.github.premnirmal.ticker.ui.NavigationType
 import com.github.premnirmal.tickerwidget.R.drawable
 import com.github.premnirmal.tickerwidget.R.string
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeListDetail(
@@ -122,12 +121,9 @@ private fun HomeListDetailNavigationWrapper(
         "No ViewModelStoreOwner was provided via LocalNavGraphViewModelStoreOwner"
     }
     val navigationViewModel = viewModel<NavigationViewModel>(viewModelStoreOwner)
-    val homeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = viewModelStoreOwner)
     val navController = rememberNavController()
     val homeNavigationActions = remember(navController) {
-        HomeNavigationActions(navController, navigationViewModel) {
-            homeViewModel.sendHomeEvent(HomeEvent.PromptRate)
-        }
+        HomeNavigationActions(navController, navigationViewModel)
     }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val selectedDestination = navBackStackEntry?.destination?.route ?: HomeRoute.Watchlist.route

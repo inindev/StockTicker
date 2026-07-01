@@ -37,14 +37,12 @@ import com.github.premnirmal.ticker.navigation.LocalNavGraphViewModelStoreOwner
 import com.github.premnirmal.ticker.navigation.NavigationViewModel
 import com.github.premnirmal.ticker.navigation.RootNavigationGraph
 import com.github.premnirmal.ticker.model.IStocksProvider
-// import com.github.premnirmal.ticker.review.AppReviewPrompter
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 private object HomeKoin : KoinComponent {
     val stocksProvider: IStocksProvider by inject()
-    // val appReviewPrompter: AppReviewPrompter by inject()
 }
 
 /**
@@ -68,15 +66,6 @@ fun HomeScreen() {
         HomeKoin.stocksProvider.schedule()
         onboardingController.showIfFirstRun()
     }
-    // Mirror Android's HomeActivity: when the user opens a quote detail, ask StoreKit for an in-app
-    // review (gated on UserPreferences.shouldPromptRate + a once-per-session guard inside the prompter).
-    // Disabled for now — the rating prompter is intentionally not enabled on iOS yet.
-    // val rootBackStackEntry by rootNavController.currentBackStackEntryAsState()
-    // LaunchedEffect(rootBackStackEntry?.destination?.route) {
-    //     if (rootBackStackEntry?.destination?.route?.startsWith(Graph.QUOTE_DETAIL) == true) {
-    //         HomeKoin.appReviewPrompter.maybeRequestReview()
-    //     }
-    // }
     RootNavigationGraph(
         navHostController = rootNavController,
         disableTransitions = isWideLayout(),
@@ -120,7 +109,7 @@ private fun HomeContent(
         NavigationViewModel()
     }
     val homeNavigationActions = remember(navController, navigationViewModel) {
-        HomeNavigationActions(navController, navigationViewModel) {}
+        HomeNavigationActions(navController, navigationViewModel)
     }
 
     LaunchedEffect(Unit) {

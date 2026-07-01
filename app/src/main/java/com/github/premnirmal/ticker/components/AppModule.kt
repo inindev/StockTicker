@@ -13,8 +13,6 @@ import com.github.premnirmal.ticker.analytics.Analytics
 import com.github.premnirmal.ticker.analytics.AnalyticsImpl
 import com.github.premnirmal.ticker.analytics.GeneralProperties
 import com.github.premnirmal.ticker.components.AppClock.AppClockImpl
-import com.github.premnirmal.ticker.home.AppReviewManager
-import com.github.premnirmal.ticker.home.IAppReviewManager
 import com.github.premnirmal.ticker.model.AlarmScheduler
 import com.github.premnirmal.ticker.model.FetchEventLogger
 import com.github.premnirmal.ticker.model.IStocksProvider
@@ -44,10 +42,10 @@ private const val PREFERENCES_FILE_NAME = "ticker.preferences_pb"
 /**
  * Android application graph. Replaces the former Hilt `AppModule` plus every
  * `@Inject constructor` class that Hilt used to wire automatically (preferences, providers,
- * scheduler, persistence, analytics, app-review).
+ * scheduler, persistence, analytics).
  *
- * `AnalyticsImpl` and `AppReviewManager` are per-flavor source-set classes, so this single
- * definition resolves to whichever implementation the active flavor compiles.
+ * `AnalyticsImpl` is a per-flavor source-set class, so this single definition resolves to whichever
+ * implementation the active flavor compiles.
  */
 val appModule = module {
     single<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
@@ -98,7 +96,6 @@ val appModule = module {
     single<QuoteStorage> { get<StocksStorage>() }
 
     single<Analytics> { AnalyticsImpl(androidContext(), lazy { get<GeneralProperties>() }) }
-    single<IAppReviewManager> { AppReviewManager(androidContext()) }
 
     single {
         ImageLoader.Builder(androidContext())

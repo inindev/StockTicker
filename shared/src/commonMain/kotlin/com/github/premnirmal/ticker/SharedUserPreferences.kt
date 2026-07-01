@@ -6,7 +6,6 @@ import com.github.premnirmal.ticker.settings.PreferenceStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.random.Random
 
 /**
  * Shared, multiplatform implementation of the [UserPreferences] settings contract and the
@@ -64,8 +63,6 @@ open class SharedUserPreferences(
     override fun setTutorialShown(shown: Boolean) {
         store.setBoolean(TUTORIAL_SHOWN, shown)
     }
-
-    override fun shouldPromptRate(): Boolean = Random.nextInt(0, 10) % 3 == 0
 
     override fun getLastSavedVersionCode(): Int = store.getInt(APP_VERSION_CODE, -1)
 

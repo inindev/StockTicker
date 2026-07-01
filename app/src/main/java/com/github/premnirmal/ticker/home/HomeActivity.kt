@@ -10,15 +10,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.compose.rememberNavController
 import com.github.premnirmal.ticker.base.BaseActivity
 import com.github.premnirmal.ticker.hasNotificationPermission
@@ -27,13 +19,11 @@ import com.github.premnirmal.ticker.navigation.RootNavigationGraphHost
 import com.github.premnirmal.tickerwidget.R
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import kotlinx.coroutines.delay
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HomeActivity : BaseActivity() {
     override val simpleName = "HomeActivity"
 
-    private val appReviewManager: IAppReviewManager by inject()
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
     private val viewModel: HomeViewModel by viewModel()
@@ -68,20 +58,6 @@ class HomeActivity : BaseActivity() {
     private fun HomeScreen() {
         val windowSizeClass = calculateWindowSizeClass(this)
         val navHostController = rememberNavController()
-        DisposableEffect(navHostController) {
-            val listener = NavController.OnDestinationChangedListener { _: NavController, destination: NavDestination, _: Bundle? ->
-                if (destination.route == Graph.QUOTE_DETAIL) {
-                    viewModel.sendHomeEvent(HomeEvent.PromptRate)
-                }
-            }
-            navHostController.addOnDestinationChangedListener(listener)
-            onDispose {
-                navHostController.removeOnDestinationChangedListener(listener)
-            }
-        }
-        var rateDialogShown by rememberSaveable {
-            mutableStateOf(false)
-        }
         RootNavigationGraphHost(
             windowWidthSizeClass = windowSizeClass.widthSizeClass,
             windowHeightSizeClass = windowSizeClass.heightSizeClass,
@@ -97,20 +73,6 @@ class HomeActivity : BaseActivity() {
             delay(1000L) // delay to ensure splash screen is shown
             viewModel.checkShowWhatsNew()
             viewModel.checkShowTutorial()
-        }
-        LaunchedEffect(Unit) {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.homeEvent.collect { event ->
-                    when (event) {
-                        is HomeEvent.PromptRate -> {
-                            if (!rateDialogShown && appPreferences.shouldPromptRate()) {
-                                appReviewManager.launchReviewFlow(this@HomeActivity)
-                                rateDialogShown = true
-                            }
-                        }
-                    }
-                }
-            }
         }
         DisposableEffect(Unit) {
             viewModel.fetchPortfolioInRealTime()

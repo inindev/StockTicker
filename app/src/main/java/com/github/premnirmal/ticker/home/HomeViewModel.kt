@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -55,10 +54,6 @@ class HomeViewModel constructor(
         get() = _isRefreshing
     private val _isRefreshing = MutableStateFlow(false)
 
-    val homeEvent: Flow<HomeEvent>
-        get() = _homeEvent
-    private val _homeEvent = MutableSharedFlow<HomeEvent>()
-
     val widgets: StateFlow<List<WidgetData>>
         get() = widgetDataProvider.widgetData
     val hasWidget: Flow<Boolean>
@@ -83,12 +78,6 @@ class HomeViewModel constructor(
 
     fun initNotifications() {
         notificationsHandler.initialize()
-    }
-
-    fun sendHomeEvent(event: HomeEvent) {
-        viewModelScope.launch {
-            _homeEvent.emit(event)
-        }
     }
 
     val totalGainLoss: Flow<TotalGainLoss>

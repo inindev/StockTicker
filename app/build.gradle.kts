@@ -230,9 +230,6 @@ dependencies {
   detektPlugins(libs.detekt.formatting)
   detektPlugins(libs.detekt.compose)
 
-  "prodImplementation"(libs.google.play.review)
-  "prodImplementation"(libs.google.play.review.ktx)
-
   "prodImplementation"(platform("com.google.firebase:firebase-bom:34.1.0"))
   "prodImplementation"("com.google.firebase:firebase-analytics")
   "prodImplementation"("com.google.firebase:firebase-crashlytics-ndk")

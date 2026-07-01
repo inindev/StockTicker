@@ -41,9 +41,6 @@ interface UserPreferences {
   /** Records that the onboarding tutorial has been shown. */
   fun setTutorialShown(shown: Boolean)
 
-  /** Whether the user should be prompted to rate the app on this launch. */
-  fun shouldPromptRate(): Boolean
-
   /**
    * The build version that was installed the last time the "What's new" changelog was shown, or `-1`
    * if it has never been recorded. Used to detect launches following an app update.
