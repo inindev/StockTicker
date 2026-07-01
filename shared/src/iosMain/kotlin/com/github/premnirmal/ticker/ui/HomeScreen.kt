@@ -260,7 +260,6 @@ private fun WatchlistPane(
                     selectedSymbol = quote.symbol
                     isDetailOpen = true
                 },
-                showHeaderBackground = false,
             )
         },
         detail = {

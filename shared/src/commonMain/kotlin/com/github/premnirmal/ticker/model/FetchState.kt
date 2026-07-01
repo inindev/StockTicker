@@ -22,6 +22,12 @@ sealed class FetchState {
     /** The last refresh succeeded at [fetchTime] (epoch millis). */
     class Success(val fetchTime: Long) : FetchState() {
         override val displayString: String by lazy { formatFetchTime(fetchTime) }
+
+        /**
+         * The fetch time as a compact wall-clock label for the watchlist top bar, e.g. `"9:21a"` /
+         * `"1:05p"` (12-hour, no leading-zero hour, `a`/`p` meridiem). See [formatUpdatedTime].
+         */
+        val updatedString: String by lazy { formatUpdatedTime(fetchTime) }
     }
 
     /** The last refresh failed with [exception]. */
@@ -38,3 +44,12 @@ sealed class FetchState {
  * `ZonedDateTime.createTimeString()` helper this replaced.
  */
 internal expect fun formatFetchTime(epochMillis: Long): String
+
+/**
+ * Formats a fetch timestamp ([epochMillis]) as a compact 12-hour wall-clock label in the system time
+ * zone: a 1- or 2-digit hour, a two-digit minute and a single-letter meridiem — `"9:21a"`, `"1:05p"`,
+ * `"12:00p"`. Used for the "Updated …" label in the watchlist top bar.
+ *
+ * Backed by `java.time` on Android and `kotlinx-datetime` on iOS, mirroring [formatFetchTime].
+ */
+internal expect fun formatUpdatedTime(epochMillis: Long): String

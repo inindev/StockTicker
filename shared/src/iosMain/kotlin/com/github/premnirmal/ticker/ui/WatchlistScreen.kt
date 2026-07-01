@@ -1,6 +1,5 @@
 package com.github.premnirmal.ticker.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,12 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.painter.Painter
 import com.github.premnirmal.shared.resources.Res
-import com.github.premnirmal.shared.resources.bg_header_dark
-import com.github.premnirmal.shared.resources.bg_header_light
+import com.github.premnirmal.shared.resources.ic_arrow_down
 import com.github.premnirmal.shared.resources.ic_money
-import com.github.premnirmal.shared.resources.last_and_next_fetch
+import com.github.premnirmal.shared.resources.updated_at
 import com.github.premnirmal.ticker.UserPreferences
 import com.github.premnirmal.ticker.components.AppNumberFormat
 import com.github.premnirmal.ticker.detail.QuoteCard
@@ -21,8 +18,8 @@ import com.github.premnirmal.ticker.home.TotalGainLoss
 import com.github.premnirmal.ticker.home.TotalHoldingsPopup
 import com.github.premnirmal.ticker.home.WatchlistContent
 import com.github.premnirmal.ticker.home.WatchlistWidget
+import com.github.premnirmal.ticker.model.FetchState
 import com.github.premnirmal.ticker.model.StocksProvider
-import com.github.premnirmal.ticker.model.formatFetchTime
 import com.github.premnirmal.ticker.navigation.HomeRoute
 import com.github.premnirmal.ticker.navigation.rememberScrollToTopAction
 import com.github.premnirmal.ticker.network.data.Quote
@@ -40,22 +37,20 @@ private object WatchlistKoin : KoinComponent {
 }
 
 /**
- * iOS watchlist, rendered with the same shared [WatchlistContent] as Android so the collapsing header
- * (app-name title, "Last fetch / Next fetch" subtitle and gradient background) matches across
- * platforms.
+ * iOS watchlist, rendered with the same shared [WatchlistContent] as Android so the compact top bar
+ * (the watchlist dropdown selector and the "Updated …" fetch time) matches across platforms.
  *
  * The shared screen is data-driven, so the iOS values are derived from the shared [IStocksProvider]:
- * the portfolio is exposed as a single [WatchlistWidget] tab (iOS has no home-screen widgets, so the
- * tab row is hidden via `hasWidgets = false`), the subtitle is built from [IStocksProvider.fetchState]
- * and [IStocksProvider.nextFetchMs], and refresh triggers [IStocksProvider.fetch]. Tapping a card
- * navigates through [onQuoteClick]; the card overflow menu removes the quote from the watchlist. The
- * shared content's scroll-to-top hooks are wired to [rememberScrollToTopAction] so reselecting the
- * Watchlist bottom-nav tab scrolls the list back to the top, matching the Android host.
+ * the portfolio is exposed as a single [WatchlistWidget] (iOS has no home-screen widgets), the
+ * "Updated …" time is built from [IStocksProvider.fetchState], and refresh triggers
+ * [IStocksProvider.fetch]. Tapping a card navigates through [onQuoteClick]; the card overflow menu
+ * removes the quote from the watchlist. The shared content's scroll-to-top hooks are wired to
+ * [rememberScrollToTopAction] so reselecting the Watchlist bottom-nav tab scrolls the list back to the
+ * top, matching the Android host.
  */
 @Composable
 fun WatchlistScreen(
     onQuoteClick: (Quote) -> Unit = {},
-    showHeaderBackground: Boolean = true,
 ) {
     val provider = remember { WatchlistKoin.stocksProvider }
     val userPreferences = remember { WatchlistKoin.userPreferences }
@@ -63,8 +58,6 @@ fun WatchlistScreen(
 
     val quotes by provider.portfolio.collectAsState()
     val fetchState by provider.fetchState.collectAsState()
-    val nextFetchMs by provider.nextFetchMs.collectAsState()
-    val isSystemDark = isSystemInDarkTheme()
 
     var isRefreshing by remember { mutableStateOf(false) }
     val onRefresh: () -> Unit = remember(provider) {
@@ -83,35 +76,21 @@ fun WatchlistScreen(
     val watchlistWidget = remember(provider, userPreferences, scope) { PortfolioWatchlistWidget(provider, userPreferences, scope) }
     val widgets = remember(watchlistWidget) { listOf(watchlistWidget) }
 
-    val subtitle = stringResource(
-        Res.string.last_and_next_fetch,
-        fetchState.displayString,
-        formatFetchTime(nextFetchMs)
-    )
+    val updatedTime = (fetchState as? FetchState.Success)?.let {
+        stringResource(Res.string.updated_at, it.updatedString)
+    }.orEmpty()
 
     val hasHoldings = remember(quotes) { quotes.any { it.hasPositions() } }
     val totalGainLoss = remember(quotes) { quotes.toTotalGainLoss() }
 
-    val themePref by userPreferences.themePrefFlow.collectAsState(initial = userPreferences.themePref)
-    val useDarkHeader = when (themePref) {
-        UserPreferences.DARK_THEME -> true
-        UserPreferences.LIGHT_THEME -> false
-        else -> isSystemDark
-    }
-    val headerBackground: Painter = painterResource(
-        if (useDarkHeader) Res.drawable.bg_header_dark else Res.drawable.bg_header_light
-    )
-
     WatchlistContent(
-        appName = iosAppName(),
-        subtitle = subtitle,
-        hasWidgets = false,
+        updatedTime = updatedTime,
         hasHoldings = hasHoldings,
         isRefreshing = isRefreshing,
         widgets = widgets,
+        dropdownArrow = painterResource(Res.drawable.ic_arrow_down),
         totalGainLoss = totalGainLoss,
         totalHoldingsIcon = painterResource(Res.drawable.ic_money),
-        headerBackground = if (showHeaderBackground) headerBackground else null,
         onRefresh = onRefresh,
         onQuoteClick = onQuoteClick,
         quoteCard = { quote, cardModifier, interactionSource, onClick, onRemoveClick ->

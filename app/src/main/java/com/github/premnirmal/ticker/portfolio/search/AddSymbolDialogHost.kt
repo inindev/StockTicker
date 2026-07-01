@@ -42,13 +42,13 @@ fun AddSymbolScreenPreview() {
                 widgetDataList = listOf(
                     SuggestionWidgetDataState(
                         "AAPL",
-                        "Widget #1",
+                        "Watchlist",
                         1,
                         true
                     ),
                     SuggestionWidgetDataState(
                         "AAPL",
-                        "Widget #2",
+                        "Watchlist 2",
                         2,
                         false
                     ),

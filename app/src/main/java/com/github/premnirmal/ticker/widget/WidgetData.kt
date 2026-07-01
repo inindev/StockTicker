@@ -163,7 +163,10 @@ class WidgetData : IWidgetData, KoinComponent {
         get() {
             var name = preferences.getString(WIDGET_NAME, "")!!
             if (name.isEmpty()) {
-                name = "Widget #$position"
+                // The default in-app watchlist (position 0) and the first home-screen widget
+                // (position 1) never coexist, so both show as the unnumbered "Watchlist"; only the
+                // second and later widgets are numbered ("Watchlist 2", "Watchlist 3", ...).
+                name = if (position <= 1) "Watchlist" else "Watchlist $position"
                 setWidgetName(name)
             }
             return name

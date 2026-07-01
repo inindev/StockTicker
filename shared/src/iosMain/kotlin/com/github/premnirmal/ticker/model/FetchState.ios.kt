@@ -30,3 +30,15 @@ internal actual fun formatFetchTime(epochMillis: Long): String {
         "$timeStr ${shortDayName(time.dayOfWeek.isoDayNumber)}"
     }
 }
+
+internal actual fun formatUpdatedTime(epochMillis: Long): String {
+    val tz = TimeZone.currentSystemDefault()
+    val time = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(tz)
+    val meridiem = if (time.hour < 12) "a" else "p"
+    // 12-hour clock with no leading-zero hour: 0 and 12 both display as "12".
+    val hour12 = when (val h = time.hour % 12) {
+        0 -> 12
+        else -> h
+    }
+    return "$hour12:${time.minute.pad2()}$meridiem"
+}
