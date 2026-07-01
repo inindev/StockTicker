@@ -20,10 +20,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.github.premnirmal.shared.resources.Res
-import com.github.premnirmal.shared.resources.ic_news
+import com.github.premnirmal.shared.resources.ic_home
+import com.github.premnirmal.shared.resources.ic_home_outline
+import com.github.premnirmal.shared.resources.ic_news_filled
+import com.github.premnirmal.shared.resources.ic_news_outline
 import com.github.premnirmal.shared.resources.ic_search
 import com.github.premnirmal.shared.resources.ic_settings
-import com.github.premnirmal.shared.resources.ic_trending_up
+import com.github.premnirmal.shared.resources.ic_settings_outline
 import com.github.premnirmal.ticker.navigation.Graph
 import com.github.premnirmal.ticker.navigation.HomeBottomNavDestination
 import com.github.premnirmal.ticker.navigation.HomeNavHost
@@ -129,27 +132,27 @@ private fun HomeContent(
     val destinations = listOf(
         HomeBottomNavDestination(
             route = HomeRoute.Watchlist,
-            selectedIcon = painterResource(Res.drawable.ic_trending_up),
-            unselectedIcon = painterResource(Res.drawable.ic_trending_up),
-            label = "Watchlist"
+            selectedIcon = painterResource(Res.drawable.ic_home),
+            unselectedIcon = painterResource(Res.drawable.ic_home_outline),
+            label = "Home"
         ),
         HomeBottomNavDestination(
             route = HomeRoute.Trending,
-            selectedIcon = painterResource(Res.drawable.ic_news),
-            unselectedIcon = painterResource(Res.drawable.ic_news),
-            label = "Trending"
+            selectedIcon = painterResource(Res.drawable.ic_news_filled),
+            unselectedIcon = painterResource(Res.drawable.ic_news_outline),
+            label = "News"
+        ),
+        HomeBottomNavDestination(
+            route = HomeRoute.Settings,
+            selectedIcon = painterResource(Res.drawable.ic_settings),
+            unselectedIcon = painterResource(Res.drawable.ic_settings_outline),
+            label = "Settings"
         ),
         HomeBottomNavDestination(
             route = HomeRoute.Search,
             selectedIcon = painterResource(Res.drawable.ic_search),
             unselectedIcon = painterResource(Res.drawable.ic_search),
             label = "Search"
-        ),
-        HomeBottomNavDestination(
-            route = HomeRoute.Settings,
-            selectedIcon = painterResource(Res.drawable.ic_settings),
-            unselectedIcon = painterResource(Res.drawable.ic_settings),
-            label = "Settings"
         )
     )
 

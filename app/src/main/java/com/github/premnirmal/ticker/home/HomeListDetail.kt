@@ -4,13 +4,11 @@ import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -65,53 +63,37 @@ fun HomeListDetail(
                 NavigationContentPosition.TOP
             }
         }
-        val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
-            "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
-        }
-        val viewModel: HomeViewModel = koinViewModel(viewModelStoreOwner = viewModelStoreOwner)
-        val hasWidget = viewModel.hasWidget.collectAsState(initial = false)
         val destinations = ArrayList<HomeBottomNavDestination>().apply {
             add(
                 HomeBottomNavDestination(
                     HomeRoute.Watchlist,
-                    selectedIcon = painterResource(id = drawable.ic_trending_up),
-                    unselectedIcon = painterResource(id = drawable.ic_trending_up),
-                    label = stringResource(string.action_portfolio)
-                )
-            )
-            if (widthSizeClass != WindowWidthSizeClass.Expanded) {
-                add(
-                    HomeBottomNavDestination(
-                        HomeRoute.Trending,
-                        selectedIcon = painterResource(id = drawable.ic_news),
-                        unselectedIcon = painterResource(id = drawable.ic_news),
-                        label = stringResource(string.action_feed)
-                    )
-                )
-            }
-            add(
-                HomeBottomNavDestination(
-                    HomeRoute.Search,
-                    selectedIcon = painterResource(id = drawable.ic_search),
-                    unselectedIcon = painterResource(id = drawable.ic_search),
-                    label = stringResource(string.action_search)
+                    selectedIcon = painterResource(id = drawable.ic_home),
+                    unselectedIcon = painterResource(id = drawable.ic_home_outline),
+                    label = stringResource(string.action_home)
                 )
             )
             add(
                 HomeBottomNavDestination(
-                    HomeRoute.Widgets,
-                    selectedIcon = painterResource(id = drawable.ic_widget),
-                    unselectedIcon = painterResource(id = drawable.ic_widget),
-                    label = stringResource(string.action_widgets),
-                    enabled = hasWidget.value
+                    HomeRoute.Trending,
+                    selectedIcon = painterResource(id = drawable.ic_news_filled),
+                    unselectedIcon = painterResource(id = drawable.ic_news_outline),
+                    label = stringResource(string.action_news)
                 )
             )
             add(
                 HomeBottomNavDestination(
                     HomeRoute.Settings,
                     selectedIcon = painterResource(id = drawable.ic_settings),
-                    unselectedIcon = painterResource(id = drawable.ic_settings),
+                    unselectedIcon = painterResource(id = drawable.ic_settings_outline),
                     label = stringResource(string.action_settings)
+                )
+            )
+            add(
+                HomeBottomNavDestination(
+                    HomeRoute.Search,
+                    selectedIcon = painterResource(id = drawable.ic_search),
+                    unselectedIcon = painterResource(id = drawable.ic_search),
+                    label = stringResource(string.action_search)
                 )
             )
         }
