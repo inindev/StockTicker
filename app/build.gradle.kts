@@ -26,23 +26,10 @@ detekt {
   autoCorrect = true
 }
 
-buildscript {
-  repositories {
-    mavenCentral()
-    google()
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
-    maven("https://jitpack.io")
-  }
-  dependencies {
-    classpath(kotlin("gradle-plugin", version = "2.0.0"))
-  }
-}
-
 repositories {
+  google()
   mavenCentral()
-  maven("https://oss.sonatype.org/content/repositories/snapshots/")
   maven("https://jitpack.io")
-  maven("https://maven.google.com")
 }
 
 android {
@@ -51,7 +38,7 @@ android {
   }
 
   namespace = "com.github.premnirmal.tickerwidget"
-  compileSdk = 36
+  compileSdk = 37
   buildToolsVersion = "31.0.0"
 
   val name = project.getVersionNameFromGit()
@@ -122,7 +109,11 @@ android {
   buildTypes {
     release {
       isDebuggable = false
-      signingConfig = signingConfigs.getByName("release")
+      // Only apply the release signing config when a keystore is present; otherwise
+      // produce an unsigned APK so it can be signed manually (e.g. with the debug key).
+      if (file("keystore.jks").exists()) {
+        signingConfig = signingConfigs.getByName("release")
+      }
       isMinifyEnabled = true
       setProguardFiles(listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"))
     }
