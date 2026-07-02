@@ -21,7 +21,6 @@ import org.junit.Test
 class StocksStorageTest : BaseUnitTest() {
 
     private lateinit var db: QuotesDB
-    private lateinit var tickersStore: FakeTickersStore
     private lateinit var storage: StocksStorage
 
     @Before fun initStorage() {
@@ -29,17 +28,11 @@ class StocksStorageTest : BaseUnitTest() {
         db = Room.inMemoryDatabaseBuilder<QuotesDB>(context)
             .allowMainThreadQueries()
             .build()
-        tickersStore = FakeTickersStore()
-        storage = StocksStorage(tickersStore, db.quoteDao())
+        storage = StocksStorage(db.quoteDao())
     }
 
     @After fun closeDb() {
         db.close()
-    }
-
-    @Test fun testSaveAndReadTickers() {
-        storage.saveTickers(setOf("AAPL", "MSFT"))
-        assertEquals(setOf("AAPL", "MSFT"), storage.readTickers())
     }
 
     @Test fun testSaveAndReadQuote() {
@@ -148,11 +141,5 @@ class StocksStorageTest : BaseUnitTest() {
             // Newest (highest createdAtMs) should be first.
             assertEquals("e3", logs.first().event)
         }
-    }
-
-    private class FakeTickersStore : TickersStore {
-        private var tickers: Set<String> = emptySet()
-        override fun saveTickers(tickers: Set<String>) { this.tickers = tickers }
-        override fun readTickers(): Set<String> = tickers
     }
 }

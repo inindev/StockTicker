@@ -1,6 +1,5 @@
 package com.github.premnirmal.ticker.widget
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Parcelable
@@ -12,11 +11,10 @@ import androidx.core.content.edit
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import com.github.premnirmal.ticker.AppPreferences
-import com.github.premnirmal.ticker.AppPreferences.Companion.toCommaSeparatedString
 import com.github.premnirmal.ticker.NightMode
-import com.github.premnirmal.ticker.model.AlarmScheduler
 import com.github.premnirmal.ticker.model.StocksProvider
 import com.github.premnirmal.ticker.network.data.Quote
+import com.github.premnirmal.ticker.repo.WatchlistRepository
 import com.github.premnirmal.ticker.ui.AppMessaging
 import com.github.premnirmal.ticker.widget.IWidgetData.LayoutType
 import com.github.premnirmal.tickerwidget.R
@@ -26,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
@@ -35,9 +32,10 @@ import org.koin.core.component.inject
 class WidgetData : IWidgetData, KoinComponent {
 
     companion object {
-        private const val SORTED_STOCK_LIST = AppPreferences.SORTED_STOCK_LIST
         private const val PREFS_NAME_PREFIX = "stocks_widget_"
-        private const val WIDGET_NAME = "WIDGET_NAME"
+        // The watchlist this widget displays. 0 = unset -> resolves to All Symbols.
+        private const val WATCHLIST_ID = "WATCHLIST_ID"
+        const val NO_WATCHLIST = 0L
         private const val LAYOUT_TYPE = AppPreferences.LAYOUT_TYPE
         private const val WIDGET_SIZE = AppPreferences.WIDGET_SIZE
 
@@ -60,6 +58,8 @@ class WidgetData : IWidgetData, KoinComponent {
 
     private val stocksProvider: StocksProvider by inject()
 
+    private val watchlistRepository: WatchlistRepository by inject()
+
     private val context: Context by inject()
 
     private val widgetDataProvider: WidgetDataProvider by inject()
@@ -70,11 +70,12 @@ class WidgetData : IWidgetData, KoinComponent {
 
     private val appMessaging: AppMessaging by inject()
 
-    private val alarmScheduler: AlarmScheduler by inject()
-
-    private val position: Int
     override val widgetId: Int
-    private val tickerList: MutableList<String>
+    // In-memory cache of the associated watchlist's symbols, (re)loaded by [refreshFromWatchlist].
+    // Never persisted - the watchlist store is the source of truth.
+    private val tickerList: MutableList<String> = ArrayList()
+    // Cached name of the associated watchlist, used to label the widget in the settings selector.
+    private var associatedWatchlistName: String = "Watchlist"
     val tickers: StateFlow<List<String>>
         get() = _tickerList
     private val _tickerList = MutableStateFlow<List<String>>(emptyList())
@@ -91,37 +92,13 @@ class WidgetData : IWidgetData, KoinComponent {
     private val _data by lazy { MutableStateFlow(toState()) }
 
     constructor(
-        position: Int,
         widgetId: Int
     ) {
-        this.position = position
         this.widgetId = widgetId
         val prefsName = "$PREFS_NAME_PREFIX$widgetId"
         preferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        val tickerListVars = preferences.getString(SORTED_STOCK_LIST, "")
-        tickerList = if (tickerListVars.isNullOrEmpty()) {
-            ArrayList()
-        } else {
-            ArrayList(
-                listOf(
-                    *tickerListVars.split(",".toRegex())
-                        .dropLastWhile(String::isEmpty)
-                        .toTypedArray()
-                )
-            )
-        }
         save()
         _autoSortEnabled.value = autoSortEnabled()
-    }
-
-    constructor(
-        position: Int,
-        widgetId: Int,
-        isFirstWidget: Boolean
-    ) : this(position, widgetId) {
-        if (isFirstWidget && tickerList.isEmpty()) {
-            addAllFromStocksProvider()
-        }
     }
 
     private val nightMode: Boolean
@@ -159,29 +136,51 @@ class WidgetData : IWidgetData, KoinComponent {
             return R.color.text_widget_negative
         }
 
+    // A widget is a view onto a watchlist, so its label is the associated watchlist's name (cached
+    // by [refreshFromWatchlist]) rather than a separately-stored widget name.
     override val widgetName: String
-        get() {
-            var name = preferences.getString(WIDGET_NAME, "")!!
-            if (name.isEmpty()) {
-                // The default in-app watchlist (position 0) and the first home-screen widget
-                // (position 1) never coexist, so both show as the unnumbered "Watchlist"; only the
-                // second and later widgets are numbered ("Watchlist 2", "Watchlist 3", ...).
-                name = if (position <= 1) "Watchlist" else "Watchlist $position"
-                setWidgetName(name)
-            }
-            return name
-        }
+        get() = associatedWatchlistName
 
     fun widgetName(): String = widgetName
 
-    fun setWidgetName(value: String) {
+    /** The id of the watchlist this widget-view displays; [NO_WATCHLIST] until configured. */
+    val watchlistId: Long
+        get() = preferences.getLong(WATCHLIST_ID, NO_WATCHLIST)
+
+    /** Points this widget-view at watchlist [id] and re-renders it with that list's symbols. */
+    fun setWatchlistId(id: Long) {
         preferences.edit {
-            putString(WIDGET_NAME, value)
+            putLong(WATCHLIST_ID, id)
         }
         _prefsFlow.value = toPrefs()
         _data.value = toState()
-        emitWidgetChanges()
-        runBlocking { widgetDataProvider.refreshWidgetDataList() }
+        coroutineScope.launch {
+            refreshFromWatchlist()
+            emitWidgetChanges()
+            widgetDataProvider.refreshWidgetDataList()
+        }
+    }
+
+    /**
+     * Loads this widget's ticker list from its associated watchlist. The widget is a *view* onto a
+     * watchlist - it does not own its symbols. An unset [watchlistId] resolves to the All Symbols
+     * master, so a freshly-added widget shows everything until the user picks a list.
+     */
+    suspend fun refreshFromWatchlist() {
+        // Resolve the associated watchlist; fall back to All Symbols when unset or when the watchlist
+        // was deleted (so a widget pointing at a removed list re-points to the master rather than
+        // showing nothing).
+        val watchlist = watchlistId.takeIf { it != NO_WATCHLIST }
+            ?.let { watchlistRepository.getWatchlist(it) }
+            ?: watchlistRepository.getOrCreateAllSymbols()
+        associatedWatchlistName = watchlist.name
+        synchronized(tickerList) {
+            tickerList.clear()
+            tickerList.addAll(watchlist.symbols)
+        }
+        _prefsFlow.value = toPrefs()
+        _data.value = toState()
+        refreshStocksList()
     }
 
     override val changeType: IWidgetData.ChangeType
@@ -390,65 +389,6 @@ class WidgetData : IWidgetData, KoinComponent {
         emitWidgetChanges()
     }
 
-    fun getTickers(): List<String> = tickerList
-
-    fun hasTicker(symbol: String): Boolean {
-        synchronized(tickerList) {
-            var found = false
-            val toRemove: MutableList<String> = ArrayList()
-            for (ticker in tickerList) {
-                if (!stocksProvider.hasTicker(ticker)) {
-                    toRemove.add(ticker)
-                } else {
-                    if (ticker == symbol) {
-                        found = true
-                    }
-                }
-            }
-            tickerList.removeAll(toRemove)
-            return found
-        }
-    }
-
-    fun rearrange(tickers: List<String>) {
-        synchronized(tickerList) {
-            tickerList.clear()
-            tickerList.addAll(tickers)
-        }
-        save()
-    }
-
-    fun addTicker(ticker: String) {
-        synchronized(tickerList) {
-            if (!tickerList.contains(ticker)) {
-                tickerList.add(ticker)
-            }
-            stocksProvider.addStock(ticker)
-        }
-        save()
-    }
-
-    fun addTickers(tickers: List<String>) {
-        synchronized(tickerList) {
-            val filtered = tickers.filter { !tickerList.contains(it) }
-            tickerList.addAll(filtered)
-            stocksProvider.addStocks(filtered.filter { !stocksProvider.hasTicker(it) })
-        }
-        save()
-    }
-
-    fun removeStock(ticker: String) {
-        synchronized(tickerList) {
-            tickerList.remove(ticker)
-        }
-        save()
-        alarmScheduler.enqueueCleanup()
-    }
-
-    fun addAllFromStocksProvider() {
-        addTickers(stocksProvider.tickers.value)
-    }
-
     fun showRefreshButton(): Boolean = preferences.getBoolean(SHOW_REFRESH, false)
 
     fun setShowRefreshButton(show: Boolean) {
@@ -464,6 +404,7 @@ class WidgetData : IWidgetData, KoinComponent {
         return Prefs(
             id = widgetId,
             name = widgetName(),
+            watchlistId = watchlistId,
             autoSort = autoSortEnabled(),
             boldText = readIsBoldEnabled(),
             hideWidgetHeader = readHideHeader(),
@@ -509,9 +450,6 @@ class WidgetData : IWidgetData, KoinComponent {
     }
 
     private fun save() {
-        synchronized(tickerList) {
-            preferences.edit { putString(SORTED_STOCK_LIST, tickerList.toCommaSeparatedString()) }
-        }
         _prefsFlow.value = toPrefs()
         _data.value = toState()
         _tickerList.value = tickerList
@@ -528,7 +466,11 @@ class WidgetData : IWidgetData, KoinComponent {
     }
 
     fun emitWidgetChanges() {
-        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+        // Only real home-screen widgets have a Glance id (always a positive app-widget id). The
+        // default in-app list (INVALID_APPWIDGET_ID == 0) has no home-screen widget, so pushing a
+        // Glance update would throw "Invalid AppWidget ID"; it still updates its in-app state above,
+        // only the Glance push is skipped.
+        if (widgetId > 0) {
             coroutineScope.launch {
                 val glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(widgetId)
                 updateAppWidgetState(
@@ -623,6 +565,7 @@ class WidgetData : IWidgetData, KoinComponent {
     data class Prefs(
         val id: Int,
         val name: String,
+        val watchlistId: Long,
         val autoSort: Boolean,
         val boldText: Boolean,
         val hideWidgetHeader: Boolean,

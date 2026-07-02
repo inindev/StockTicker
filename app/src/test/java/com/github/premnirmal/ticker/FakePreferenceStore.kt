@@ -4,7 +4,7 @@ import com.github.premnirmal.ticker.settings.PreferenceStore
 
 /**
  * Simple in-memory [PreferenceStore] for unit tests, replacing the previous direct use of
- * `SharedPreferences` when constructing [AppPreferences].
+ * 'SharedPreferences' when constructing [AppPreferences].
  */
 class FakePreferenceStore : PreferenceStore {
 

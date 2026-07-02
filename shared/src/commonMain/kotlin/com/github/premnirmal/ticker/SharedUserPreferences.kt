@@ -13,14 +13,14 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * This is the common heart of the "App Preferences" migration: the read/write logic for the update
  * interval, the boolean toggles, the theme preference, the refresh/tooltip flows, the crumb token
- * and the configured update window used to be duplicated between Android's `AppPreferences`
- * (backed by `SharedPreferences`) and iOS's [UserDefaultsPreferences]. It now lives here in
- * `commonMain`, with the platform classes reduced to thin subclasses that only supply the concrete
- * [PreferenceStore] and any platform-only extras (e.g. Android's `java.text` decimal formatters and
+ * and the configured update window used to be duplicated between Android's 'AppPreferences'
+ * (backed by 'SharedPreferences') and iOS's [UserDefaultsPreferences]. It now lives here in
+ * 'commonMain', with the platform classes reduced to thin subclasses that only supply the concrete
+ * [PreferenceStore] and any platform-only extras (e.g. Android's 'java.text' decimal formatters and
  * app-version bookkeeping).
  *
  * The configured update window is expressed with the platform-neutral [Time] value and ISO
- * day-of-week numbers (Monday = 1 … Sunday = 7), and the theme preference is mapped to the shared
+ * day-of-week numbers (Monday = 1 ... Sunday = 7), and the theme preference is mapped to the shared
  * [com.github.premnirmal.tickerwidget.ui.theme.SelectedTheme] / [NightMode] types by
  * [UserPreferences] itself, so both platforms behave identically.
  */
@@ -143,7 +143,7 @@ open class SharedUserPreferences(
     }
 
     /**
-     * The selected update days as ISO day-of-week numbers (Monday = 1 … Sunday = 7). Defaults to the
+     * The selected update days as ISO day-of-week numbers (Monday = 1 ... Sunday = 7). Defaults to the
      * weekdays when nothing is selected.
      */
     override fun updateDays(): Set<Int> {

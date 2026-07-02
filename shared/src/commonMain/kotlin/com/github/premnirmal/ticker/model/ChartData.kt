@@ -5,10 +5,10 @@ import com.github.premnirmal.ticker.network.data.DataPoint
 
 /**
  * The result of a chart fetch: the previous close / current price plus the ordered list of
- * [DataPoint]s. Moved from the Android-only `HistoryProvider.ChartData` into `commonMain` so the
+ * [DataPoint]s. Moved from the Android-only 'HistoryProvider.ChartData' into 'commonMain' so the
  * shared chart fetch ([HistoryProvider]) and the future shared presentation layer can use it. The
- * `…String()` helpers use the shared [AppNumberFormat] (replacing `AppPreferences`'s decimal
- * formats); the Compose-aware `changeColour` lives in `:app` as an extension because it depends on
+ * '...String()' helpers use the shared [AppNumberFormat] (replacing 'AppPreferences's decimal
+ * formats); the Compose-aware 'changeColour' lives in ':app' as an extension because it depends on
  * Android theming.
  */
 data class ChartData(

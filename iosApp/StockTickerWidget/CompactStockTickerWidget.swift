@@ -3,16 +3,16 @@ import SwiftUI
 import AppIntents
 import Shared
 
-/// A text-only, tightly compacted home-screen widget — the iOS counterpart of the Android "text"
-/// widget: every quote occupies a single, dense row (symbol · price · change%) so many more symbols
-/// fit on screen than in the card-style ``StockTickerWidget``.
+/// A text-only, tightly compacted home-screen widget - the iOS counterpart of the Android "text"
+/// widget: every quote occupies a single, dense row (symbol / price / change%) so many more symbols
+/// fit on screen than in the card-style 'StockTickerWidget'.
 ///
-/// It reuses the shared ``StockTickerProvider`` / ``StockTickerConfigurationIntent`` (so it honours the
+/// It reuses the shared 'StockTickerProvider' / 'StockTickerConfigurationIntent' (so it honours the
 /// same per-widget watchlist selection, sort and appearance options) and only swaps in a denser view.
 
 // MARK: - Row
 
-/// One tightly packed quote line: `SYMBOL …… price  change%`.
+/// One tightly packed quote line: 'SYMBOL ...... price  change%'.
 ///
 /// Everything is constrained to a single line and allowed to scale down slightly so a quote never
 /// exceeds the two-line budget, matching the compact Android widget.
@@ -50,7 +50,7 @@ private struct CompactQuoteRowView: View {
 
 // MARK: - Grid
 
-/// Lays the compact rows out in one or more columns, capped at `maxItems` so nothing clips (iOS
+/// Lays the compact rows out in one or more columns, capped at 'maxItems' so nothing clips (iOS
 /// widgets cannot scroll). A small "last fetch" header mirrors the Android compact widget.
 private struct CompactGridView: View {
     let entry: StockTickerEntry
@@ -68,14 +68,11 @@ private struct CompactGridView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            if entry.configuration.showHeader && !entry.isPlaceholder {
-                Text("Last fetch: \(entry.date, format: .dateTime.hour().minute())")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            if entry.configuration.showHeader && !entry.updatedLabel.isEmpty {
+                WidgetUpdatedHeader(updatedLabel: entry.updatedLabel)
             }
             if entry.quotes.isEmpty {
-                CompactEmptyView()
+                CompactEmptyView(watchlistName: entry.watchlistName)
             } else {
                 LazyVGrid(columns: gridColumns, alignment: .leading, spacing: 2) {
                     ForEach(entry.quotes.prefix(maxItems)) { row in
@@ -89,11 +86,13 @@ private struct CompactGridView: View {
 }
 
 private struct CompactEmptyView: View {
+    var watchlistName: String = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("Stocks")
+            Text(watchlistName.isEmpty ? "Stocks" : watchlistName)
                 .font(.caption.weight(.semibold))
-            Text("Add symbols to your watchlist.")
+            Text("This watchlist is empty.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -136,7 +135,7 @@ struct CompactStockTickerWidget: Widget {
             CompactStockTickerWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Stocks (Compact)")
-        .description("A dense, text-only watchlist — every symbol on its own line.")
+        .description("A dense, text-only watchlist - every symbol on its own line.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Theme/accent colours shared by the Compose Multiplatform widgets. Hoisting these out of the
- * Android-only `ColourPalette` lets shared widgets (the quote card, total-holdings popup, news card
- * placeholder, …) render the same change/gain/loss colours on Android and iOS. The Android
- * `ColourPalette` delegates its change-colour accessors here so there is a single source of truth.
+ * Android-only 'ColourPalette' lets shared widgets (the quote card, total-holdings popup, news card
+ * placeholder, ...) render the same change/gain/loss colours on Android and iOS. The Android
+ * 'ColourPalette' delegates its change-colour accessors here so there is a single source of truth.
  */
 object SharedColours {
   private val LightChangePositive = Color(0xFF66BB6A)
@@ -38,7 +38,7 @@ object SharedColours {
 
   /**
    * Resolves the colour used to render a value that moved up/down/unchanged, matching
-   * [PositiveGreen]/[NegativeRed] and falling back to the theme's `onSurfaceVariant`.
+   * [PositiveGreen]/[NegativeRed] and falling back to the theme's 'onSurfaceVariant'.
    */
   @Composable
   fun changeColour(up: Boolean, down: Boolean): Color = when {

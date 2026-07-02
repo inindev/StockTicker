@@ -58,12 +58,12 @@ import com.github.premnirmal.ticker.ui.TopBar
  *  - the localised labels ([searchTitle]/[searchFieldLabel]/[suggestionsErrorText]) as [String]s,
  *  - the clear-query icon as a [Painter] ([clearIcon]),
  *  - the quote card, suggestion row and add/remove dialog as composable slots
- *    ([quoteCard]/[suggestionItem]/[addSymbolDialog]) — they still pull in the (not-yet-shared)
+ *    ([quoteCard]/[suggestionItem]/[addSymbolDialog]) - they still pull in the (not-yet-shared)
  *    theme/resources on Android,
- *  - the list fading-edge decoration as [listFadingEdges] (Android `RuntimeShader`),
+ *  - the list fading-edge decoration as [listFadingEdges] (Android 'RuntimeShader'),
  *  - the navigation scroll-to-top registration as [registerScrollToTop],
  *  - the optional adaptive two-pane layout as [twoPane] (null = single column).
- * The Android `SearchScreen` host in `:app` supplies them.
+ * The Android 'SearchScreen' host in ':app' supplies them.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,7 +144,7 @@ fun SearchScreen(
                     }
                     // Dismiss the keyboard on a tap in the content area. detectTapGestures runs on
                     // the Main pass and waits for an up event, so taps consumed by a child (e.g. the
-                    // search TextField gaining focus, or a card click) never reach here — only taps
+                    // search TextField gaining focus, or a card click) never reach here - only taps
                     // on empty content do, which is exactly when the keyboard should be dismissed.
                     // Reacting to the first down on the Initial pass instead would also fire on the
                     // synthetic pointer events that occur while typing, dismissing the keyboard on

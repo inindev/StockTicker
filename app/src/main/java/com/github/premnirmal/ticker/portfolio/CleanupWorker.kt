@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.github.premnirmal.ticker.model.StocksProvider
-import com.github.premnirmal.ticker.widget.WidgetDataProvider
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -18,17 +17,10 @@ class CleanupWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     private val stocksProvider: StocksProvider by inject()
 
-    private val widgetDataProvider: WidgetDataProvider by inject()
-
     override suspend fun doWork(): Result {
-        val tickers = stocksProvider.tickers.value
-        val toRemove = ArrayList<String>()
-        for (ticker in tickers) {
-            if (!widgetDataProvider.containsTicker(ticker)) {
-                toRemove.add(ticker)
-            }
-        }
-        stocksProvider.removeStocks(toRemove)
+        // The fetch set (tickerSet) is derived from the All Symbols master list, so there are no
+        // orphaned tracked symbols to prune. This just drops stored quotes whose symbol is no longer
+        // tracked (storage hygiene).
         stocksProvider.cleanup()
         Timber.d("Cleanup success")
         return Result.success()

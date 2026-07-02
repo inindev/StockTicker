@@ -17,9 +17,9 @@ internal const val READ_TIMEOUT: Long = 5000
 val YAHOO = named("yahoo")
 
 /**
- * Android networking graph. Replaces the former Hilt `NetworkModule`: builds the OkHttp clients
- * and the per-endpoint API clients. The orchestrators that consume these clients (`StocksApi`,
- * `NewsProvider`, `HistoryProvider`, `CommitsProvider`) live in the shared
+ * Android networking graph. Replaces the former Hilt 'NetworkModule': builds the OkHttp clients
+ * and the per-endpoint API clients. The orchestrators that consume these clients ('StocksApi',
+ * 'NewsProvider', 'HistoryProvider', 'CommitsProvider') live in the shared
  * [com.github.premnirmal.ticker.di.sharedModule].
  */
 val networkModule = module {

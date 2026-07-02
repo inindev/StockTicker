@@ -17,8 +17,8 @@ import kotlinx.coroutines.isActive
 
 /**
  * Collects [bottomSheets] messages, queues them and shows one bottom sheet at a time. The message
- * source is hoisted as a [Flow] parameter so this stays free of the Android-only `AppMessaging`
- * dispatcher; the platform host supplies `LocalAppMessaging.current.bottomSheets`.
+ * source is hoisted as a [Flow] parameter so this stays free of the Android-only 'AppMessaging'
+ * dispatcher; the platform host supplies 'LocalAppMessaging.current.bottomSheets'.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

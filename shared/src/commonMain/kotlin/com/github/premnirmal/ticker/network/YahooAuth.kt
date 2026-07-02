@@ -7,16 +7,16 @@ import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.http.HttpHeaders
 
 /**
- * The browser `User-Agent` Yahoo Finance expects. Mirrors the value previously injected by the
- * Android-only OkHttp interceptor in `NetworkModule.provideHttpClientForYahoo`.
+ * The browser 'User-Agent' Yahoo Finance expects. Mirrors the value previously injected by the
+ * Android-only OkHttp interceptor in 'NetworkModule.provideHttpClientForYahoo'.
  */
 internal const val YAHOO_USER_AGENT: String =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
         "Chrome/115.0.0.0 Safari/537.36"
 
 /**
- * The browser `Accept` header Yahoo Finance expects. Mirrors the value previously injected by the
- * Android-only `CrumbInterceptor`.
+ * The browser 'Accept' header Yahoo Finance expects. Mirrors the value previously injected by the
+ * Android-only 'CrumbInterceptor'.
  */
 internal const val YAHOO_ACCEPT: String =
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8," +
@@ -34,7 +34,7 @@ internal class YahooAuthConfig {
  * Android-only OkHttp interceptors:
  *
  * - forces the browser [YAHOO_USER_AGENT] and [YAHOO_ACCEPT] headers (overwriting any defaults),
- * - appends the current `crumb` query parameter (when one is available) to every request.
+ * - appends the current 'crumb' query parameter (when one is available) to every request.
  *
  * Cookie persistence is handled separately by the [HttpCookies] plugin installed in
  * [installYahooAuth]. Because it is engine-agnostic, the same auth works on every platform
@@ -44,7 +44,7 @@ internal val yahooAuthPlugin = createClientPlugin("YahooAuth", ::YahooAuthConfig
     val crumbProvider = pluginConfig.crumbProvider
     onRequest { request, _ ->
         // Use set semantics ([]=) so we overwrite any engine/content-negotiation defaults, mirroring
-        // the OkHttp `removeHeader(...).addHeader(...)` behaviour.
+        // the OkHttp 'removeHeader(...).addHeader(...)' behaviour.
         request.headers[HttpHeaders.UserAgent] = YAHOO_USER_AGENT
         request.headers[HttpHeaders.Accept] = YAHOO_ACCEPT
         val crumb = crumbProvider.getCrumb()
@@ -56,8 +56,8 @@ internal val yahooAuthPlugin = createClientPlugin("YahooAuth", ::YahooAuthConfig
 
 /**
  * Installs the shared Yahoo Finance authentication onto a Ktor client configuration: the browser
- * `User-Agent`/`Accept` headers and crumb query parameter (via [yahooAuthPlugin]) plus an in-memory
- * cookie store (via [HttpCookies], the multiplatform equivalent of the Android `YahooFinanceCookies`
+ * 'User-Agent'/'Accept' headers and crumb query parameter (via [yahooAuthPlugin]) plus an in-memory
+ * cookie store (via [HttpCookies], the multiplatform equivalent of the Android 'YahooFinanceCookies'
  * cookie jar). Reused by [createYahooHttpClient] so every platform shares identical auth handling.
  */
 internal fun HttpClientConfig<*>.installYahooAuth(crumbProvider: CrumbProvider) {
@@ -66,7 +66,7 @@ internal fun HttpClientConfig<*>.installYahooAuth(crumbProvider: CrumbProvider) 
     // finance.yahoo.com (which sets the A1/A3 session cookies). Ktor's HttpRedirect plugin only
     // follows redirects for GET/HEAD by default (checkHttpMethod = true), so the consent POST would
     // otherwise surface as a raw 302 and the cookies would never be collected. Disabling the method
-    // check makes the consent POST follow the redirect — matching the Android OkHttp client, which
+    // check makes the consent POST follow the redirect - matching the Android OkHttp client, which
     // follows redirects for every method.
     install(HttpRedirect) {
         checkHttpMethod = false

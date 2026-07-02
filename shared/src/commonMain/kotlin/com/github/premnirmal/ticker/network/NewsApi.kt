@@ -10,7 +10,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 
 /**
  * Shared xmlutil [XML] configuration for decoding RSS feeds. It mirrors the previous SimpleXML
- * `strict = false` behaviour by ignoring unknown elements/attributes (RSS feeds carry many channel
+ * 'strict = false' behaviour by ignoring unknown elements/attributes (RSS feeds carry many channel
  * fields the app does not model).
  */
 internal val RssXml: XML = XML {
@@ -22,16 +22,16 @@ internal val RssXml: XML = XML {
 /**
  * Decodes an RSS document body into a [NewsRssFeed]. The feeds are fetched as text and parsed
  * explicitly (rather than via Ktor content-negotiation) so parsing does not depend on the server's
- * `Content-Type`, which varies across the Google/Yahoo endpoints.
+ * 'Content-Type', which varies across the Google/Yahoo endpoints.
  */
 internal fun parseRssFeed(body: String): NewsRssFeed =
     RssXml.decodeFromString(NewsRssFeed.serializer(), body)
 
 /**
  * Multiplatform client for the Google News RSS endpoints. Replaces the Android-only Retrofit
- * `GoogleNewsApi` interface; the public contract is unchanged so `NewsProvider` keeps working.
+ * 'GoogleNewsApi' interface; the public contract is unchanged so 'NewsProvider' keeps working.
  *
- * @param baseUrl the Google News base URL (e.g. `https://news.google.com/`).
+ * @param baseUrl the Google News base URL (e.g. 'https://news.google.com/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class GoogleNewsApi(
@@ -63,9 +63,9 @@ class GoogleNewsApi(
 
 /**
  * Multiplatform client for the Yahoo Finance news RSS endpoint. Replaces the Android-only Retrofit
- * `YahooFinanceNewsApi` interface; the public contract is unchanged so `NewsProvider` keeps working.
+ * 'YahooFinanceNewsApi' interface; the public contract is unchanged so 'NewsProvider' keeps working.
  *
- * @param baseUrl the Yahoo Finance news base URL (e.g. `https://finance.yahoo.com/news/`).
+ * @param baseUrl the Yahoo Finance news base URL (e.g. 'https://finance.yahoo.com/news/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class YahooFinanceNewsApi(

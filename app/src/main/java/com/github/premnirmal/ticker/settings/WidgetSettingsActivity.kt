@@ -5,16 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.github.premnirmal.ticker.base.BaseActivity
 import com.github.premnirmal.ticker.ui.LocalAppMessaging
 import com.github.premnirmal.ticker.widget.WidgetsScreen
@@ -63,15 +66,16 @@ class WidgetSettingsActivity : BaseActivity() {
                     selectedWidgetId = widgetId,
                     showSpinner = false,
                     topAppBarActions = {
-                        IconButton(
+                        FilledIconButton(
                             onClick = {
                                 setOkResult()
                                 finish()
-                            }
+                            },
+                            modifier = Modifier.padding(end = 4.dp),
                         ) {
-                            Text(
-                                text = stringResource(R.string.done),
-                                style = MaterialTheme.typography.labelMedium,
+                            Icon(
+                                painter = painterResource(R.drawable.ic_done),
+                                contentDescription = stringResource(R.string.done),
                             )
                         }
                     }

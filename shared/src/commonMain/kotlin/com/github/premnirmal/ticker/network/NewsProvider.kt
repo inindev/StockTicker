@@ -13,9 +13,9 @@ import kotlinx.coroutines.withContext
 /**
  * Aggregates the news/trending feeds (Google News, Yahoo Finance news, Yahoo "most active" and the
  * ApeWisdom fallback) into the shared [NewsArticle]/[Quote]/[FetchResult] domain model. Migrated
- * from the Android-only `:app` module into `commonMain`: it no longer depends on `Timber` (now
- * [AppLogger]), `Dispatchers.IO` (now [ioDispatcher]) or Hilt/`javax.inject` (constructed by the
- * platform DI layer). The public contract is unchanged so existing `:app` callers do not need to
+ * from the Android-only ':app' module into 'commonMain': it no longer depends on 'Timber' (now
+ * [AppLogger]), 'Dispatchers.IO' (now [ioDispatcher]) or Hilt/'javax.inject' (constructed by the
+ * platform DI layer). The public contract is unchanged so existing ':app' callers do not need to
  * change.
  */
 class NewsProvider(
@@ -98,8 +98,8 @@ class NewsProvider(
                             // fail because it is the first Yahoo call and the crumb/consent cookies have
                             // not been bootstrapped yet (loadCrumb only runs reactively on the quote's
                             // 401). Crucially, that first call can also come back HTTP 200 with an empty
-                            // quote list — which `wasSuccessful` (data != null) still reports as a
-                            // success — so we must also fall through when the data is empty, otherwise the
+                            // quote list - which 'wasSuccessful' (data != null) still reports as a
+                            // success - so we must also fall through when the data is empty, otherwise the
                             // empty list would be cached and the trending screen would stay blank until a
                             // manual retry. The fallback request reuses that now-established session and
                             // succeeds, populating the trending list on the first attempt.

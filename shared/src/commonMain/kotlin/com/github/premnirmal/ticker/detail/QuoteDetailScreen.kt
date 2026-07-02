@@ -84,8 +84,8 @@ private val MaxChartHeight = 220.dp
 /**
  * A single localised key/value row shown in the quote-detail grid. Both the [title] label and the
  * formatted [data] are resolved to plain [String]s by the Android host (the Android-only
- * `buildQuoteDetails` resolves the `@StringRes`/`Context`), so this shared model has no Android
- * string-resource or `Context` dependency.
+ * 'buildQuoteDetails' resolves the '@StringRes'/'Context'), so this shared model has no Android
+ * string-resource or 'Context' dependency.
  */
 data class QuoteDetailItem(
     val title: String,
@@ -94,7 +94,7 @@ data class QuoteDetailItem(
 
 /**
  * The localised labels shown by the quote-detail screen, resolved by the Android host via
- * `stringResource` and passed in as plain [String]s so the shared screen has no Android
+ * 'stringResource' and passed in as plain [String]s so the shared screen has no Android
  * string-resource dependency.
  */
 data class QuoteDetailStrings(
@@ -128,22 +128,22 @@ data class QuoteDetailStrings(
  *    [longBusinessSummary]/[isInPortfolio]/[isRefreshing]/[showAddRemoveTooltip]/[range]/
  *    [graphError]/[position]/[alertAbove]/[alertBelow]/[notes]/[displayname]) as plain values,
  *  - the resolved change/up/down colours ([changeColour]/[upColor]/[downColor]) as [Color]s (the
- *    `ColourPalette`/Compose theming stays in `:app`),
+ *    'ColourPalette'/Compose theming stays in ':app'),
  *  - the localised labels as a [QuoteDetailStrings] holder and the pre-formatted alert values
  *    ([alertAboveText]/[alertBelowText]) as [String]s,
  *  - the refresh/add/edit icons as [Painter]s,
  *  - the chart axis/marker label formatters as lambdas (date/number formatting is platform-specific),
  *  - the per-section edit navigation, refresh, range selection, tooltip-shown and bottom-sheet
  *    card-tap events as callback lambdas,
- *  - the snackbar host as [snackbarHostState] (the host owns `AppMessaging`),
- *  - the `AppCard` container, `NewsCard`, `AddSymbolDialog` and website `LinkText` as composable
- *    slots ([card]/[newsCard]/[addSymbolDialog]/[websiteLink]) — they still pull in the
- *    (not-yet-shared) `:UI`/`:app` theme/resources on Android,
- *  - the fading-edge decoration as [listFadingEdges] (Android `RuntimeShader`),
+ *  - the snackbar host as [snackbarHostState] (the host owns 'AppMessaging'),
+ *  - the 'AppCard' container, 'NewsCard', 'AddSymbolDialog' and website 'LinkText' as composable
+ *    slots ([card]/[newsCard]/[addSymbolDialog]/[websiteLink]) - they still pull in the
+ *    (not-yet-shared) ':UI'/':app' theme/resources on Android,
+ *  - the fading-edge decoration as [listFadingEdges] (Android 'RuntimeShader'),
  *  - the optional adaptive two-pane layout as [twoPane] (null = single column).
  *  - the optional top-bar [navigationIcon] slot (e.g. an iOS back button; empty on Android, which
  *    relies on system/predictive back).
- * The Android `QuoteDetailScreen` host in `:app` supplies them.
+ * The Android 'QuoteDetailScreen' host in ':app' supplies them.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

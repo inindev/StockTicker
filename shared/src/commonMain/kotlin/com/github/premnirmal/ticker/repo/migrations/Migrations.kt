@@ -7,8 +7,8 @@ import androidx.sqlite.execSQL
 /**
  * Room KMP migrations for [com.github.premnirmal.ticker.repo.QuotesDB].
  *
- * These were ported from the Android-only `SupportSQLiteDatabase` migrations to the multiplatform
- * `androidx.room.migration.Migration` / `androidx.sqlite.SQLiteConnection` API. The raw SQL is
+ * These were ported from the Android-only 'SupportSQLiteDatabase' migrations to the multiplatform
+ * 'androidx.room.migration.Migration' / 'androidx.sqlite.SQLiteConnection' API. The raw SQL is
  * unchanged so existing Android databases migrate exactly as before; they now also run on iOS.
  */
 
@@ -127,6 +127,30 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
     }
 }
 
+/**
+ * Migration from version 9 to version 10:
+ * Add watchlist tables 'WatchlistRow' and 'WatchlistMembershipRow'. Rows start empty; the All
+ * Symbols master list is seeded on first launch via [com.github.premnirmal.ticker.repo.WatchlistRepository.seedFromTickersIfNeeded].
+ */
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `WatchlistRow` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`name` TEXT NOT NULL, `position` INTEGER NOT NULL)"
+        )
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `WatchlistMembershipRow` (`watchlist_id` INTEGER NOT NULL, " +
+                "`symbol` TEXT NOT NULL, `position` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`watchlist_id`, `symbol`), " +
+                "FOREIGN KEY(`watchlist_id`) REFERENCES `WatchlistRow`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_WatchlistMembershipRow_watchlist_id` " +
+                "ON `WatchlistMembershipRow` (`watchlist_id`)"
+        )
+    }
+}
+
 /** The full ordered migration chain, applied by [com.github.premnirmal.ticker.repo.buildQuotesDB]. */
 val allMigrations: Array<Migration> = arrayOf(
     MIGRATION_1_2,
@@ -136,5 +160,6 @@ val allMigrations: Array<Migration> = arrayOf(
     MIGRATION_5_6,
     MIGRATION_6_7,
     MIGRATION_7_8,
-    MIGRATION_8_9
+    MIGRATION_8_9,
+    MIGRATION_9_10
 )

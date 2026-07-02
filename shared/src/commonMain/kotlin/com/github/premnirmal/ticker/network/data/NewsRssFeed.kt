@@ -5,9 +5,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Root RSS feed model. Migrated from the SimpleXML `@Root(name = "rss")` / `@Path("channel")` model
- * into `commonMain`; the inline `<item>` list lives under `<channel>`, and [articleList] preserves
- * the public accessor the previous model exposed so `NewsProvider` keeps working unchanged.
+ * Root RSS feed model. Migrated from the SimpleXML @Root(name = "rss") / @Path("channel") model
+ * into 'commonMain'; the inline '<item>' list lives under '<channel>', and [articleList] preserves
+ * the public accessor the previous model exposed so 'NewsProvider' keeps working unchanged.
  */
 @Serializable
 @XmlSerialName("rss")
@@ -20,7 +20,7 @@ class NewsRssFeed(
 }
 
 /**
- * RSS `<channel>` element holding the inline list of `<item>` articles.
+ * RSS '<channel>' element holding the inline list of '<item>' articles.
  */
 @Serializable
 @XmlSerialName("channel")

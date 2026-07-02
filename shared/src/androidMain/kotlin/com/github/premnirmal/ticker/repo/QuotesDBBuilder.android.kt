@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 /**
- * Android [QuotesDB] builder. Uses the same database file name (`quotes-db`) as the previous
+ * Android [QuotesDB] builder. Uses the same database file name ('quotes-db') as the previous
  * Android-only Room setup so existing installs keep their data and run the same migration chain.
  */
 fun getQuotesDBBuilder(context: Context): RoomDatabase.Builder<QuotesDB> {

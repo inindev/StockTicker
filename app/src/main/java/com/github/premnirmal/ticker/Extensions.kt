@@ -97,7 +97,7 @@ fun ZonedDateTime.createTimeString(): String {
 }
 
 /**
- * Maps the shared [NightMode] onto AndroidX `AppCompatDelegate`'s `MODE_NIGHT_*` constants.
+ * Maps the shared [NightMode] onto AndroidX 'AppCompatDelegate's 'MODE_NIGHT_*' constants.
  */
 @AppCompatDelegate.NightMode
 fun NightMode.toAppCompatNightMode(): Int = when (this) {

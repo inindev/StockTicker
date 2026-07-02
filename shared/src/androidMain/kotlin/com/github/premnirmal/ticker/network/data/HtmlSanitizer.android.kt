@@ -6,7 +6,7 @@ import android.text.Html
 
 /**
  * Android implementation backed by [android.text.Html], preserving the exact sanitization behaviour
- * the app previously used in `NewsArticle.descriptionSanitized()` / `titleSanitized()`.
+ * the app previously used in 'NewsArticle.descriptionSanitized()' / 'titleSanitized()'.
  */
 actual fun sanitizeHtml(html: String): String {
     return if (VERSION.SDK_INT >= VERSION_CODES.N) {

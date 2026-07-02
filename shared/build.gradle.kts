@@ -51,7 +51,7 @@ val generateChangelog by tasks.registering {
         |package com.github.premnirmal.shared
         |
         |/**
-        | * Generated at build time from the local git history (see :shared `generateChangelog`).
+        | * Generated at build time from the local git history (see :shared 'generateChangelog').
         | * Shared by every platform so Android and iOS show the same "what's new" changelog.
         | */
         |internal object ChangelogBuildConfig {
@@ -68,8 +68,8 @@ kotlin {
     compilerOptions {
       jvmTarget.set(JvmTarget.JVM_17)
     }
-    // kotlin-parcelize only recognises `kotlinx.parcelize.Parcelize` by default. Our shared
-    // models are annotated with the multiplatform `@CommonParcelize` alias, so we register it
+    // kotlin-parcelize only recognises 'kotlinx.parcelize.Parcelize' by default. Our shared
+    // models are annotated with the multiplatform '@CommonParcelize' alias, so we register it
     // as an additional Parcelize annotation on the Android compilations (where the plugin runs)
     // to ensure the real Parcelable implementations are generated.
     compilations.configureEach {
@@ -146,7 +146,7 @@ kotlin {
   }
 }
 
-// Generate the Compose Multiplatform resource accessor (`Res`) into a fixed, public package so the
+// Generate the Compose Multiplatform resource accessor ('Res') into a fixed, public package so the
 // shared Compose UI (and the iOS host) can reference the bundled drawables deterministically.
 compose.resources {
   publicResClass = true
@@ -175,7 +175,7 @@ android {
 // CMP navigation-compose is pinned to the stable 2.9.2 line (see gradle/libs.versions.toml),
 // which pulls androidx.navigation:*:2.9.x for Android. Guard against any transitive bump to the
 // 2.10.x pre-release line (which requires compileSdk 37 + AGP 9.x) by forcing it back to the
-// Jetpack 2.8.x line that the project already uses — the CMP wrapper klib stays ABI-compatible.
+// Jetpack 2.8.x line that the project already uses - the CMP wrapper klib stays ABI-compatible.
 configurations.matching { it.name.contains("Android") || it.name.contains("android") || it.name.startsWith("debug") || it.name.startsWith("release") }
   .configureEach {
     resolutionStrategy.eachDependency {

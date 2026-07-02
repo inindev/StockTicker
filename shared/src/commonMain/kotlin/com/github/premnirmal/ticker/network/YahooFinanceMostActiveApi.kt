@@ -6,13 +6,13 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.appendPathSegments
 
 /**
- * Result of a Yahoo Finance "most active" request. Mirrors the small slice of `retrofit2.Response`
+ * Result of a Yahoo Finance "most active" request. Mirrors the small slice of 'retrofit2.Response'
  * that the caller relied on (HTTP status code + the parsed list of trending symbols) without leaking
- * Retrofit/Jsoup/Ktor types into `:app`, so the existing trending-stocks logic in `NewsProvider`
+ * Retrofit/Jsoup/Ktor types into ':app', so the existing trending-stocks logic in 'NewsProvider'
  * keeps working unchanged.
  *
- * The HTML parsing that previously happened in `NewsProvider` (via Jsoup `Document.select(...)`) now
- * lives in [parseMostActiveSymbols] in `commonMain`, so it is shared across platforms.
+ * The HTML parsing that previously happened in 'NewsProvider' (via Jsoup 'Document.select(...)') now
+ * lives in [parseMostActiveSymbols] in 'commonMain', so it is shared across platforms.
  *
  * @param statusCode the HTTP status code of the response.
  * @param symbols the de-duplicated list of trending stock symbols scraped from the page (empty when
@@ -27,15 +27,15 @@ data class YahooMostActiveResult(
 
 /**
  * Multiplatform client for the Yahoo Finance "most active" page. Replaces the Android-only Retrofit
- * `YahooFinanceMostActive` interface (which returned a Jsoup `Document`); the public contract
- * (`suspend fun getMostActive(): YahooMostActiveResult`) now returns the already-parsed list of
+ * 'YahooFinanceMostActive' interface (which returned a Jsoup 'Document'); the public contract
+ * ('suspend fun getMostActive(): YahooMostActiveResult') now returns the already-parsed list of
  * trending symbols so the caller no longer needs Jsoup.
  *
- * The Yahoo endpoint requires the browser `User-Agent`/cookie authentication that lives in the
+ * The Yahoo endpoint requires the browser 'User-Agent'/cookie authentication that lives in the
  * Android OkHttp stack, so callers pass an [httpClient] backed by that client (see the Android
- * `createHttpClient(OkHttpClient)` factory).
+ * 'createHttpClient(OkHttpClient)' factory).
  *
- * @param baseUrl the Yahoo Finance base URL (e.g. `https://finance.yahoo.com/`).
+ * @param baseUrl the Yahoo Finance base URL (e.g. 'https://finance.yahoo.com/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class YahooFinanceMostActiveApi(
@@ -67,11 +67,11 @@ class YahooFinanceMostActiveApi(
  * Extracts trending stock symbols from the Yahoo Finance "most active" HTML page.
  *
  * This reproduces the previous Jsoup-based selection without a JVM-only HTML parser: it scans every
- * `<fin-streamer …>` start tag and collects the value of its `data-symbol` attribute when the tag
- * also carries `class="fw(600)"` (case-insensitive), preserving first-seen order and de-duplicating.
+ * '<fin-streamer ...>' start tag and collects the value of its 'data-symbol' attribute when the tag
+ * also carries class="fw(600)" (case-insensitive), preserving first-seen order and de-duplicating.
  *
  * The markup Yahoo serves is best-effort and may change, so callers should treat an empty result as
- * "no symbols" and fall back accordingly (as `NewsProvider` already does).
+ * "no symbols" and fall back accordingly (as 'NewsProvider' already does).
  */
 internal fun parseMostActiveSymbols(html: String): List<String> {
     val symbols = LinkedHashSet<String>()
@@ -90,7 +90,7 @@ internal fun parseMostActiveSymbols(html: String): List<String> {
 
 /**
  * Returns the value of [name] within an HTML start-tag [attributes] string (the text between the tag
- * name and the closing `>`), or `null` when the attribute is absent. Handles double- or single-quoted
+ * name and the closing '>'), or 'null' when the attribute is absent. Handles double- or single-quoted
  * values and is case-insensitive on the attribute name.
  */
 private fun attributeValue(attributes: String, name: String): String? {

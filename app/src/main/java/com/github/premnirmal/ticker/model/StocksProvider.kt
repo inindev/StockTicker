@@ -10,6 +10,7 @@ import com.github.premnirmal.ticker.network.data.Holding
 import com.github.premnirmal.ticker.network.data.Position
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.ticker.repo.StocksStorage
+import com.github.premnirmal.ticker.repo.WatchlistRepository
 import com.github.premnirmal.ticker.widget.WidgetDataProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,7 @@ class StocksProvider constructor(
     private val alarmScheduler: AlarmScheduler,
     private val fetchEventLogger: FetchEventLogger,
     private val storage: StocksStorage,
+    private val watchlistRepository: WatchlistRepository,
     private val coroutineScope: CoroutineScope
 ) : IStocksProvider {
 
@@ -69,23 +71,57 @@ class StocksProvider constructor(
     private val _portfolio = MutableStateFlow<List<Quote>>(emptyList())
 
     init {
-        val tickers = storage.readTickers()
         val lastFetchedLoaded = preferences.getLong(LAST_FETCHED, 0L)
         lastFetched = lastFetchedLoaded
         val nextFetch = preferences.getLong(NEXT_FETCH, 0L)
         _nextFetch.value = nextFetch
-        this.tickerSet.addAll(tickers)
-        if (this.tickerSet.isEmpty()) {
-            this.tickerSet.addAll(DEFAULT_STOCKS)
-            saveTickers()
+        // The All Symbols master list is the durable source of truth for the fetch set. Seed it with
+        // the defaults on a fresh store, then load tickerSet from it (tickerSet is a pure in-memory
+        // cache - it is never persisted separately).
+        val initialSymbols = runBlocking {
+            watchlistRepository.seedFromTickersIfNeeded(DEFAULT_STOCKS.toList())
+            watchlistRepository.getOrCreateAllSymbols().symbols
         }
+        this.tickerSet.addAll(initialSymbols)
         _tickers.value = tickerSet.toList()
         _fetchState.value = FetchState.Success(lastFetched)
         runBlocking { fetchLocal() }
+        // Keep tickerSet reconciled with All Symbols so any change (add/remove in-app, import, or a
+        // future platform) flows into the fetch set and triggers a fetch of newly-tracked symbols.
+        coroutineScope.launch {
+            watchlistRepository.allSymbolsFlow().collect { symbols -> syncFromAllSymbols(symbols) }
+        }
         if (lastFetched == 0L || (nextFetch > 0L && nextFetch < clock.currentTimeMillis())) {
             coroutineScope.launch {
                 fetch()
             }
+        }
+    }
+
+    /**
+     * Reconciles the in-memory [tickerSet] with the All Symbols master list. Drops quotes for symbols
+     * no longer tracked and fetches ones newly added. New symbols added through this provider's own
+     * mutation methods are already in [tickerSet], so this only fetches when All Symbols changed via
+     * another path (avoiding a redundant re-fetch).
+     */
+    private suspend fun syncFromAllSymbols(symbols: List<String>) {
+        val newSet = symbols.toSet()
+        val added: Set<String>
+        val removed: Set<String>
+        synchronized(tickerSet) {
+            added = newSet - tickerSet
+            removed = tickerSet - newSet
+            tickerSet.clear()
+            tickerSet.addAll(symbols)
+        }
+        if (removed.isNotEmpty()) {
+            synchronized(quoteMap) { removed.forEach { quoteMap.remove(it) } }
+            storage.removeQuotesBySymbol(removed.toList())
+        }
+        _tickers.emit(tickerSet.toList())
+        _portfolio.emit(quoteMap.values.filter { tickerSet.contains(it.symbol) }.toList())
+        if (added.isNotEmpty()) {
+            fetch(allowScheduling = false)
         }
     }
 
@@ -105,10 +141,6 @@ class StocksProvider constructor(
         preferences.edit {
             putLong(LAST_FETCHED, lastFetched)
         }
-    }
-
-    private fun saveTickers() {
-        storage.saveTickers(tickerSet)
     }
 
     override fun scheduleUpdate(reason: String) {
@@ -313,12 +345,14 @@ class StocksProvider constructor(
                 tickerSet.add(ticker)
                 val quote = Quote(symbol = ticker)
                 quoteMap[ticker] = quote
-                saveTickers()
             }
         }
         _tickers.value = tickerSet.toList()
         _portfolio.value = quoteMap.values.filter { tickerSet.contains(it.symbol) }.toList()
         coroutineScope.launch {
+            // Persist to the durable source (All Symbols); the reactive collector keeps tickerSet in
+            // sync. Already added to tickerSet above, so it won't trigger a redundant re-fetch.
+            watchlistRepository.addSymbolsToAllSymbols(listOf(ticker))
             val result = fetchStockInternal(ticker, false)
             if (result.wasSuccessful) {
                 val data = result.data
@@ -351,7 +385,8 @@ class StocksProvider constructor(
             }
         }
         _tickers.emit(tickerSet.toList())
-        saveTickers()
+        // A holding tracks its symbol, so ensure it is in the durable All Symbols master list.
+        watchlistRepository.addSymbolsToAllSymbols(listOf(ticker))
         val holding = Holding(ticker, shares, price)
         position.add(holding)
         quote?.position = position
@@ -378,14 +413,15 @@ class StocksProvider constructor(
     }
 
     override fun addStocks(symbols: Collection<String>): Collection<String> {
+        val filterNot: List<String>
         synchronized(this.tickerSet) {
-            val filterNot = symbols.filterNot { this.tickerSet.contains(it) }
+            filterNot = symbols.filterNot { this.tickerSet.contains(it) }
             filterNot.forEach { this.tickerSet.add(it) }
-            saveTickers()
-            if (filterNot.isNotEmpty()) {
-                coroutineScope.launch {
-                    fetch()
-                }
+        }
+        if (filterNot.isNotEmpty()) {
+            coroutineScope.launch {
+                watchlistRepository.addSymbolsToAllSymbols(filterNot)
+                fetch()
             }
         }
         _tickers.value = tickerSet.toList()
@@ -396,9 +432,10 @@ class StocksProvider constructor(
     override suspend fun removeStock(ticker: String): Collection<String> {
         synchronized(quoteMap) {
             tickerSet.remove(ticker)
-            saveTickers()
             quoteMap.remove(ticker)
         }
+        // Untrack in the durable source (removes it from All Symbols, cascading to every subset).
+        watchlistRepository.untrack(ticker)
         storage.removeQuoteBySymbol(ticker)
         _tickers.emit(tickerSet.toList())
         _portfolio.emit(quoteMap.values.filter { tickerSet.contains(it.symbol) }.toList())
@@ -412,10 +449,10 @@ class StocksProvider constructor(
                 quoteMap.remove(it)
             }
         }
+        watchlistRepository.untrack(symbols)
         storage.removeQuotesBySymbol(symbols.toList())
         _tickers.emit(tickerSet.toList())
         _portfolio.emit(quoteMap.values.filter { tickerSet.contains(it.symbol) }.toList())
-        saveTickers()
     }
 
     override suspend fun cleanup() {
@@ -440,9 +477,8 @@ class StocksProvider constructor(
                 quoteMap[symbol] = it
             }
         }
-        saveTickers()
-        widgetDataProvider.updateWidgets(tickerSet.toList())
         coroutineScope.launch {
+            watchlistRepository.addSymbolsToAllSymbols(portfolio.map { it.symbol })
             storage.saveQuotes(portfolio)
             fetchLocal()
             fetch()

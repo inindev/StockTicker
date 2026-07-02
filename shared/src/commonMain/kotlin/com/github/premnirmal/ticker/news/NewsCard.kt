@@ -32,7 +32,7 @@ import com.github.premnirmal.tickerwidget.ui.theme.SharedColours
  *
  * The only Android-coupled input is the article tap (the Custom Tabs open on Android, the in-app
  * Safari view on iOS), hoisted as the [onClick] callback. The container ([AppCard]) and the image
- * placeholder colour ([SharedColours.ImagePlaceHolderGray]) both live in `commonMain`.
+ * placeholder colour ([SharedColours.ImagePlaceHolderGray]) both live in 'commonMain'.
  */
 @Composable
 fun NewsCard(

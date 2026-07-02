@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
  * It resolves the effective dark/light mode from the user's [SelectedTheme] (falling back to the
  * system setting for [SelectedTheme.SYSTEM]) and applies the shared brand colour scheme, the shared
  * [appTypography] type scale and the shared [appShapes]. Platforms that support dynamic colour (e.g.
- * Android Material You) can supply a [colorSchemeOverride]; when it is `null` the brand scheme is
+ * Android Material You) can supply a [colorSchemeOverride]; when it is 'null' the brand scheme is
  * used, so iOS and non-dynamic Android render identically.
  */
 @Composable

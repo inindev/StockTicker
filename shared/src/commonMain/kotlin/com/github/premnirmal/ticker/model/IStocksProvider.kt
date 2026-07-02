@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * This is the shared "provider interface" of the multiplatform persistence/refresh story: it mirrors
  * the existing [RefreshScheduler] / [com.github.premnirmal.ticker.repo.QuoteStorage] /
- * [com.github.premnirmal.ticker.UserPreferences] splits — the common contract lives in `commonMain`
- * (in terms of the already-shared `Quote`/`Position`/`Holding`/`FetchResult` models), while the
- * Android implementation wires it to platform infrastructure (`Context`/`SharedPreferences`,
- * `AlarmScheduler`, `WidgetDataProvider`, the Room-backed `StocksStorage`). On Android this is
- * implemented by `StocksProvider`; the iOS app provides its own implementation.
+ * [com.github.premnirmal.ticker.UserPreferences] splits - the common contract lives in 'commonMain'
+ * (in terms of the already-shared 'Quote'/'Position'/'Holding'/'FetchResult' models), while the
+ * Android implementation wires it to platform infrastructure ('Context'/'SharedPreferences',
+ * 'AlarmScheduler', 'WidgetDataProvider', the Room-backed 'StocksStorage'). On Android this is
+ * implemented by 'StocksProvider'; the iOS app provides its own implementation.
  *
  * The state of the most recent refresh is exposed through [fetchState]; its [FetchState] display
  * string is formatted behind the multiplatform [formatFetchTime] boundary, so it is part of this
@@ -43,7 +43,7 @@ interface IStocksProvider {
   fun hasTicker(ticker: String): Boolean
 
   /**
-   * Fetches fresh quotes for the whole watchlist. When [allowScheduling] is `true` the next refresh
+   * Fetches fresh quotes for the whole watchlist. When [allowScheduling] is 'true' the next refresh
    * is (re)scheduled as part of the fetch.
    */
   suspend fun fetch(allowScheduling: Boolean = true): FetchResult<List<Quote>>
@@ -60,7 +60,7 @@ interface IStocksProvider {
   /** Whether [ticker] has holdings. */
   fun hasPosition(ticker: String): Boolean
 
-  /** The [Position] for [ticker], or `null` if there is none. */
+  /** The [Position] for [ticker], or 'null' if there is none. */
   fun getPosition(ticker: String): Position?
 
   /** Adds a holding ([shares] at [price]) to [ticker], returning the created [Holding]. */
@@ -82,12 +82,12 @@ interface IStocksProvider {
   suspend fun cleanup()
 
   /**
-   * Fetches a single quote for [ticker]. When [allowCache] is `true` a cached quote may be returned
+   * Fetches a single quote for [ticker]. When [allowCache] is 'true' a cached quote may be returned
    * instead of hitting the network.
    */
   suspend fun fetchStock(ticker: String, allowCache: Boolean = true): FetchResult<Quote>
 
-  /** The cached [Quote] for [ticker], or `null` if there is none. */
+  /** The cached [Quote] for [ticker], or 'null' if there is none. */
   fun getStock(ticker: String): Quote?
 
   /** Seeds the provider with a previously loaded [portfolio]. */

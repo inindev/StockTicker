@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -31,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,9 +61,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.premnirmal.shared.resources.Res
+import com.github.premnirmal.shared.resources.ic_add
+import com.github.premnirmal.shared.resources.ic_done
+import com.github.premnirmal.shared.resources.ic_settings_outline
+import com.github.premnirmal.shared.resources.manage_watchlists
+import com.github.premnirmal.shared.resources.new_watchlist
 import com.github.premnirmal.ticker.navigation.LocalContentBottomPadding
 import com.github.premnirmal.ticker.network.data.Quote
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.min
 import sh.calvin.reorderable.ReorderableItem
@@ -71,8 +82,8 @@ import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
  * and the events it raises are hoisted as parameters so it has no Android, navigation or
  * dependency-injection dependencies.
  *
- * The top bar is a single compact row — a [WatchlistWidget] dropdown selector on the left and the
- * "Updated …" fetch time ([updatedTime]) on the right — sitting directly above the swipeable pager of
+ * The top bar is a single compact row - a [WatchlistWidget] dropdown selector on the left and the
+ * "Updated ..." fetch time ([updatedTime]) on the right - sitting directly above the swipeable pager of
  * per-widget grids. Selecting a widget from the dropdown scrolls the pager to that page, and swiping
  * the pager updates the selected entry, so the two stay in sync.
  *  - the watchlist pages come from [widgets] and the dropdown chevron from [dropdownArrow],
@@ -80,7 +91,7 @@ import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
  *  - the quote card is a composable [quoteCard] slot (it still pulls in the not-yet-shared theme),
  *  - the navigation scroll-to-top registrations are [registerResetScroll]/[registerWidgetScroll].
  *
- * The Android `WatchlistContent` host in `:app` supplies them.
+ * The Android 'WatchlistContent' host in ':app' supplies them.
  *
  * TODO(bottom-bar-refactor): the total-holdings button that previously lived in this screen's top bar
  *  is moving into the home bottom navigation bar. The [hasHoldings]/[totalGainLoss]/[totalHoldingsIcon]
@@ -108,6 +119,8 @@ fun WatchlistContent(
     ) -> Unit,
     totalHoldingsPopup: @Composable (totalHoldings: TotalGainLoss, onDismiss: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
+    onManageWatchlists: (() -> Unit)? = null,
+    onNewWatchlist: (() -> Unit)? = null,
     listFadingEdges: (ScrollableState) -> Modifier = { Modifier },
     registerResetScroll: @Composable (reset: suspend () -> Unit) -> Unit = {},
     registerWidgetScroll: @Composable (index: Int, scroll: suspend () -> Unit) -> Unit = { _, _ -> },
@@ -155,6 +168,8 @@ fun WatchlistContent(
                 onWidgetSelected = { index ->
                     coroutineScope.launch { rowState.animateScrollToItem(index) }
                 },
+                onManageWatchlists = onManageWatchlists,
+                onNewWatchlist = onNewWatchlist,
             )
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 Content(
@@ -181,7 +196,7 @@ fun WatchlistContent(
 
 /**
  * Compact watchlist top bar: the watchlist [WatchlistWidget] dropdown selector on the left and the
- * "Updated …" fetch time on the right, on a single row that clears the status bar.
+ * "Updated ..." fetch time on the right, on a single row that clears the status bar.
  */
 @Composable
 private fun WatchlistTopBar(
@@ -190,6 +205,8 @@ private fun WatchlistTopBar(
     updatedTime: String,
     dropdownArrow: Painter,
     onWidgetSelected: (Int) -> Unit,
+    onManageWatchlists: (() -> Unit)?,
+    onNewWatchlist: (() -> Unit)?,
 ) {
     Row(
         modifier = Modifier
@@ -208,6 +225,8 @@ private fun WatchlistTopBar(
                     selectedItemIndex = selectedItemIndex.coerceIn(0, widgets.lastIndex),
                     dropdownArrow = dropdownArrow,
                     onWidgetSelected = onWidgetSelected,
+                    onManageWatchlists = onManageWatchlists,
+                    onNewWatchlist = onNewWatchlist,
                 )
             }
         }
@@ -231,6 +250,8 @@ private fun WatchlistSelector(
     selectedItemIndex: Int,
     dropdownArrow: Painter,
     onWidgetSelected: (Int) -> Unit,
+    onManageWatchlists: (() -> Unit)?,
+    onNewWatchlist: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -265,16 +286,53 @@ private fun WatchlistSelector(
                     text = {
                         Text(
                             text = widget.name,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = if (index == selectedItemIndex) FontWeight.Bold else FontWeight.Normal,
-                            ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     },
+                    // Selection is shown with a leading checkmark (macOS style); unselected rows get
+                    // an equal-width spacer so all names align in the same gutter.
+                    leadingIcon = {
+                        if (index == selectedItemIndex) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_done),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            Spacer(Modifier.size(24.dp))
+                        }
+                    },
                     onClick = {
                         onWidgetSelected(index)
                         expanded = false
+                    },
+                )
+            }
+            if (onManageWatchlists != null || onNewWatchlist != null) {
+                HorizontalDivider()
+            }
+            onManageWatchlists?.let { manage ->
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(Res.string.manage_watchlists)) },
+                    leadingIcon = {
+                        Icon(painter = painterResource(Res.drawable.ic_settings_outline), contentDescription = null)
+                    },
+                    onClick = {
+                        expanded = false
+                        manage()
+                    },
+                )
+            }
+            onNewWatchlist?.let { new ->
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(Res.string.new_watchlist)) },
+                    leadingIcon = {
+                        Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = null)
+                    },
+                    onClick = {
+                        expanded = false
+                        new()
                     },
                 )
             }

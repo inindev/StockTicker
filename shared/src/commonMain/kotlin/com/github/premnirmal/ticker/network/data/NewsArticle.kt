@@ -6,13 +6,13 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import kotlinx.serialization.Serializable
 
 /**
- * A single RSS news item. Migrated from the Android-only SimpleXML model into `commonMain` so the
+ * A single RSS news item. Migrated from the Android-only SimpleXML model into 'commonMain' so the
  * news feeds can be parsed by the shared Ktor/xmlutil networking layer.
  *
- * The XML mapping is expressed with `kotlinx.serialization` + xmlutil annotations (replacing the
- * SimpleXML `@Root`/`@Element` annotations). The Android-specific HTML sanitization now goes through
- * the [sanitizeHtml] `expect`/`actual`, and date parsing/formatting through the multiplatform
- * [ArticleDate] (replacing `java.time`).
+ * The XML mapping is expressed with 'kotlinx.serialization' + xmlutil annotations (replacing the
+ * SimpleXML '@Root'/'@Element' annotations). The Android-specific HTML sanitization now goes through
+ * the [sanitizeHtml] 'expect'/'actual', and date parsing/formatting through the multiplatform
+ * [ArticleDate] (replacing 'java.time').
  */
 @Serializable
 @XmlSerialName("item")
@@ -77,7 +77,7 @@ class NewsArticle(
 }
 
 /**
- * RSS `media:content` element (carries the article thumbnail URL as an attribute).
+ * RSS 'media:content' element (carries the article thumbnail URL as an attribute).
  */
 @Serializable
 @XmlSerialName("content", namespace = NewsArticle.MEDIA_NAMESPACE)
@@ -87,7 +87,7 @@ class Thumbnail(
 )
 
 /**
- * Convenience factory mirroring the previous `:app` helper, used by Compose previews/tests to build
+ * Convenience factory mirroring the previous ':app' helper, used by Compose previews/tests to build
  * an article without going through XML deserialization.
  */
 @Suppress("FunctionNaming")

@@ -8,11 +8,11 @@ import kotlinx.coroutines.withContext
 
 /**
  * Fetches a symbol's chart history for a [Range] and maps it into the shared [ChartData] model.
- * Moved from the Android-only `:app` module into `commonMain`: it no longer depends on `Timber`
- * (now [AppLogger]), `Dispatchers.IO` (now [ioDispatcher]) or Hilt/`javax.inject` (it is now plain
- * and constructed by the platform DI layer, e.g. `:app`'s `NetworkModule`). The public contract
- * (`suspend fun fetchDataByRange(symbol, range): FetchResult<ChartData>`) is unchanged so existing
- * `:app` callers do not need to change.
+ * Moved from the Android-only ':app' module into 'commonMain': it no longer depends on 'Timber'
+ * (now [AppLogger]), 'Dispatchers.IO' (now [ioDispatcher]) or Hilt/'javax.inject' (it is now plain
+ * and constructed by the platform DI layer, e.g. ':app's 'NetworkModule'). The public contract
+ * ('suspend fun fetchDataByRange(symbol, range): FetchResult<ChartData>') is unchanged so existing
+ * ':app' callers do not need to change.
  */
 class HistoryProvider(
     private val chartApi: ChartApi

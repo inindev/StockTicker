@@ -3,12 +3,12 @@ package com.github.premnirmal.ticker.settings
 import platform.Foundation.NSUserDefaults
 
 /**
- * [PreferenceStore] over [NSUserDefaults], the iOS counterpart of Android's `SharedPreferences`.
+ * [PreferenceStore] over [NSUserDefaults], the iOS counterpart of Android's 'SharedPreferences'.
  *
  * This is the legacy native iOS key/value store; production wiring now defaults to the unified
  * [DataStorePreferenceStore] (DataStore Multiplatform), but this remains a valid [PreferenceStore]
  * implementation (e.g. used directly in tests). A dedicated suite name keeps the keys namespaced to
- * the app, matching the Android `PREFS_NAME`.
+ * the app, matching the Android 'PREFS_NAME'.
  */
 class SettingsStore(
     private val defaults: NSUserDefaults = NSUserDefaults(suiteName = SUITE_NAME)

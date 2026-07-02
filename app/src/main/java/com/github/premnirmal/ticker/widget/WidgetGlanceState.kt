@@ -7,7 +7,6 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.glance.state.GlanceStateDefinition
-import com.github.premnirmal.ticker.createTimeString
 import com.github.premnirmal.ticker.model.FetchState
 import com.github.premnirmal.ticker.network.data.Quote
 import kotlinx.serialization.Serializable
@@ -16,9 +15,6 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 /**
  * Glance state that holds both widget configuration and stock quotes.
@@ -150,10 +146,9 @@ sealed class SerializableFetchState {
     @Serializable
     data class Success(val fetchTime: Long) : SerializableFetchState() {
 
+        // Same compact "9:21a" wall-clock format as the home screen's "Updated" label.
         override val displayString: String by lazy {
-            val instant = Instant.ofEpochMilli(fetchTime)
-            val time = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-            time.createTimeString()
+            FetchState.Success(fetchTime).updatedString
         }
     }
 

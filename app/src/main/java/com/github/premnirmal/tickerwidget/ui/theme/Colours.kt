@@ -106,7 +106,7 @@ internal object ColourPaletteDark {
 
 /**
  * Android entry point for the shared change/accent colours. The change-colour accessors delegate to
- * [SharedColours] (the values live in `:shared` `commonMain`) so Android and iOS stay in sync.
+ * [SharedColours] (the values live in ':shared' 'commonMain') so Android and iOS stay in sync.
  */
 object ColourPalette {
     val ChangePositive: Color

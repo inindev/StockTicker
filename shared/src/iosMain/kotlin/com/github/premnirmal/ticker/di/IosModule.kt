@@ -32,10 +32,9 @@ import com.github.premnirmal.ticker.network.createYahooFinanceMostActiveApi
 import com.github.premnirmal.ticker.network.createYahooFinanceNewsApi
 import com.github.premnirmal.ticker.network.createYahooHttpClient
 import com.github.premnirmal.ticker.notifications.LocalNotificationsHandler
-import com.github.premnirmal.ticker.repo.UserDefaultsTickersStore
 import com.github.premnirmal.ticker.repo.QuotesDB
 import com.github.premnirmal.ticker.repo.StocksStorage
-import com.github.premnirmal.ticker.repo.TickersStore
+import com.github.premnirmal.ticker.repo.WatchlistRepository
 import com.github.premnirmal.ticker.repo.buildQuotesDB
 import com.github.premnirmal.ticker.repo.getQuotesDBBuilder
 import com.github.premnirmal.ticker.settings.DataStorePreferenceStore
@@ -53,6 +52,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
@@ -61,15 +61,15 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
 /**
- * iOS platform Koin module — the iOS counterpart of `:app`'s `networkModule`/`appModule`/
- * `viewModelModule`. It contributes the leaf bindings the shared [sharedModule] consumes (the Ktor
+ * iOS platform Koin module - the iOS counterpart of ':app's 'networkModule'/'appModule'/
+ * 'viewModelModule'. It contributes the leaf bindings the shared [sharedModule] consumes (the Ktor
  * API clients built with the Darwin engine, the Room-backed [StocksStorage], the [Json] instance and
- * the application [CoroutineScope]) plus the iOS concrete implementations of the Phase 2 interfaces:
- * [UserDefaultsPreferences] ([UserPreferences]/[CrumbStore]), [BackgroundRefreshScheduler] ([RefreshScheduler]),
+ * the application [CoroutineScope]) plus the iOS concrete implementations of the shared platform
+ * interfaces: [UserDefaultsPreferences] ([UserPreferences]/[CrumbStore]), [BackgroundRefreshScheduler] ([RefreshScheduler]),
  * [StocksProvider] ([IStocksProvider]) and [Analytics].
  *
  * The [backgroundTaskScheduler], [analyticsSink] and [onQuotesUpdated] platform hooks are supplied
- * by the iOS app (`BGTaskScheduler`, Firebase, WidgetKit timeline reloads); they default to no-ops
+ * by the iOS app ('BGTaskScheduler', Firebase, WidgetKit timeline reloads); they default to no-ops
  * so the graph resolves in tests and previews.
  */
 fun iosModule(
@@ -81,7 +81,7 @@ fun iosModule(
     // Core infrastructure
     // The application-lifecycle scope MUST carry a CoroutineExceptionHandler: on Kotlin/Native an
     // uncaught exception in any coroutine launched on this scope propagates to the default handler and
-    // terminates the whole app (SupervisorJob alone does not stop this — it only isolates sibling
+    // terminates the whole app (SupervisorJob alone does not stop this - it only isolates sibling
     // jobs). Several shared operations launch work here (e.g. StocksProvider.schedule()/addStock and
     // the portfolio observers), so log such failures instead of crashing, mirroring Android where a
     // background refresh failure never takes down the UI.
@@ -114,8 +114,9 @@ fun iosModule(
     // Persistence (Room KMP)
     single { buildQuotesDB(getQuotesDBBuilder()) }
     single { get<QuotesDB>().quoteDao() }
-    single<TickersStore> { UserDefaultsTickersStore(get()) }
-    single { StocksStorage(get(), get()) }
+    single { get<QuotesDB>().watchlistDao() }
+    single { WatchlistRepository(get()) }
+    single { StocksStorage(get()) }
 
     // Network (Yahoo-authenticated via the shared CrumbProvider, Darwin engine).
     // All Yahoo endpoints share a SINGLE HttpClient so they share one in-memory cookie store: the
@@ -148,6 +149,7 @@ fun iosModule(
             fetchEventLogger = get(),
             clock = get(),
             store = get(),
+            watchlistRepository = get(),
             coroutineScope = get(),
             onQuotesUpdated = onQuotesUpdated
         )
@@ -189,8 +191,8 @@ private const val APEWISDOM_ENDPOINT = "https://apewisdom.io/api/v1.0/"
 
 /**
  * Starts Koin for the iOS app with the shared and iOS platform modules. Call once from the iOS app
- * launch (see `iosApp/StockTickerApp.swift`), optionally passing the platform [backgroundTaskScheduler]
- * (a `BGTaskScheduler`/WidgetKit bridge), the [analyticsSink] (e.g. Firebase), the [crashReporter]
+ * launch (see 'iosApp/StockTickerApp.swift'), optionally passing the platform [backgroundTaskScheduler]
+ * (a 'BGTaskScheduler'/WidgetKit bridge), the [analyticsSink] (e.g. Firebase), the [crashReporter]
  * (e.g. Firebase Crashlytics, which receives shared [AppLogger] errors/warnings as non-fatals) and
  * the [onQuotesUpdated] hook (to reload WidgetKit timelines after a refresh).
  */
@@ -214,8 +216,8 @@ fun initKoinIos(
 
 /**
  * Swift-friendly accessor over the Koin graph started by [initKoinIos]. Kotlin/Native does not bridge
- * top-level `by inject()` cleanly into Swift, so the iOS app resolves shared singletons through this
- * object (e.g. `KoinHelper.shared.stocksProvider()` from the `BGTaskScheduler` handlers).
+ * top-level 'by inject()' cleanly into Swift, so the iOS app resolves shared singletons through this
+ * object (e.g. 'KoinHelper.shared.stocksProvider()' from the 'BGTaskScheduler' handlers).
  */
 object KoinHelper : KoinComponent {
     private val stocksProvider: StocksProvider by inject()
@@ -225,6 +227,7 @@ object KoinHelper : KoinComponent {
     private val scope: CoroutineScope by inject()
     private val portfolioExchange: IosPortfolioExchange by inject()
     private val widgetSnapshotStore: WidgetSnapshotStore by inject()
+    private val watchlistRepository: WatchlistRepository by inject()
     private val clock: AppClock by inject()
 
     fun stocksProvider(): StocksProvider = stocksProvider
@@ -240,7 +243,7 @@ object KoinHelper : KoinComponent {
     /**
      * Wires up local notifications: requests notification authorization (once) and starts observing
      * the shared refresh state so alerts/summaries are delivered after each quotes refresh. Call
-     * once from the iOS app launch (see `iosApp/StockTickerApp.swift`).
+     * once from the iOS app launch (see 'iosApp/StockTickerApp.swift').
      */
     fun initializeNotifications() {
         notificationsHandler.requestAuthorization()
@@ -251,18 +254,25 @@ object KoinHelper : KoinComponent {
     fun portfolioExchange(): IosPortfolioExchange = portfolioExchange
 
     /**
-     * Write the current portfolio to the shared App Group store so the WidgetKit extension can
-     * render it. Call from the iOS app's `onQuotesUpdated` hook (alongside the WidgetKit timeline
-     * reload), the iOS analogue of Android's `WidgetDataProvider` update.
+     * Write every watchlist (with its quotes) to the shared App Group store so the WidgetKit
+     * extension can render whichever one each widget selected. Call from the iOS app's
+     * 'onQuotesUpdated' hook (alongside the WidgetKit timeline reload), the iOS analogue of Android's
+     * 'WidgetDataProvider' update. Falls back to a single All Symbols list if the watchlists cache
+     * hasn't populated yet (e.g. a snapshot written extremely early in launch).
      */
     fun writeWidgetSnapshot() {
-        widgetSnapshotStore.write(stocksProvider.portfolio.value, clock.currentTimeMillis())
+        // Read the current watchlists synchronously so every snapshot reliably contains all lists with
+        // stable ids - the widget's selected-watchlist id must always resolve, or WidgetKit falls back
+        // to All Symbols. This runs on a background thread (the portfolio-observer / refresh coroutine),
+        // so the blocking DB read is safe.
+        val watchlists = runBlocking { watchlistRepository.getWatchlists() }
+        widgetSnapshotStore.write(watchlists, stocksProvider.portfolio.value, clock.currentTimeMillis())
     }
 
     /**
      * Observes the shared portfolio [kotlinx.coroutines.flow.StateFlow] from Swift, invoking [onEach]
      * on every emission. Returns a [Closeable] the caller closes to cancel the subscription (Swift
-     * cannot collect a Kotlin `Flow` directly).
+     * cannot collect a Kotlin 'Flow' directly).
      */
     fun observePortfolio(onEach: (List<Quote>) -> Unit): Closeable {
         val job = scope.launch {
@@ -272,7 +282,7 @@ object KoinHelper : KoinComponent {
     }
 }
 
-/** Minimal cancellation handle bridged to Swift (mirrors `java.io.Closeable`). */
+/** Minimal cancellation handle bridged to Swift (mirrors 'java.io.Closeable'). */
 fun interface Closeable {
     fun close()
 }

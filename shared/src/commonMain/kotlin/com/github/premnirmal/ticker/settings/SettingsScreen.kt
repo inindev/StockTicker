@@ -43,14 +43,14 @@ import com.github.premnirmal.ticker.ui.TopBar
  * dependency-injection dependencies:
  *  - the settings snapshot as a [SettingsData] value,
  *  - the user-visible strings and the three string arrays (themes, sync periods, days) as
- *    [String]/[Array] parameters resolved by the host via `stringResource`/`stringArrayResource`,
+ *    [String]/[Array] parameters resolved by the host via 'stringResource'/'stringArrayResource',
  *  - all user actions as callback lambdas,
- *  - the `Divider` as a composable [divider] slot (it lives in the Android `:UI` module),
+ *  - the 'Divider' as a composable [divider] slot (it lives in the Android ':UI' module),
  *  - the alarm-permission banner as an optional [alarmPermissionBanner] slot,
- *  - the fading-edge decoration as [listFadingEdges] (Android `RuntimeShader`),
+ *  - the fading-edge decoration as [listFadingEdges] (Android 'RuntimeShader'),
  *  - the navigation scroll-to-top registration as [registerScrollToTop],
  *  - the version/open-source fonts as nullable [FontFamily] parameters.
- * The Android `SettingsScreenHost.kt` in `:app` supplies them.
+ * The Android 'SettingsScreenHost.kt' in ':app' supplies them.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

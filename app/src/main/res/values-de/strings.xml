@@ -118,7 +118,6 @@
   <string name="already_in_portfolio">%1$s ist bereits in Ihrem Portfolio</string>
   <string name="added_to_list">%1$s wurde Ihrem Portfolio hinzugefügt</string>
   <string name="next_fetch">Nächster Abruf: %1$s</string>
-  <string name="last_fetch">Letzter Abruf: %1$s</string>
   <string name="last_and_next_fetch">Letzter Abruf: %1$s\nNächster Abruf: %2$s</string>
   <string name="total_holdings">Gesamtbestand: %1$s</string>
   <string name="cannot_export_msg">Aktienlisten können nicht ohne Berechtigung zum Schreiben in einen externen Speicher exportiert werden.</string>
@@ -185,4 +184,5 @@
   <string name="loading">Wird geladen</string>
    <string name="exact_alarm_permission_required_message">Die Berechtigung für exakte Alarme ist erforderlich, um das Widget rechtzeitig zu aktualisieren.</string>
    <string name="go_to_settings">Gewähren</string>
+  <string name="updated_at">Aktualisiert %1$s</string>
  </resources>

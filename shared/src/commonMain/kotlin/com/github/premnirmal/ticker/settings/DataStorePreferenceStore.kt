@@ -15,9 +15,9 @@ import kotlin.concurrent.Volatile
 
 /**
  * Builds a multiplatform DataStore Preferences instance persisted at [producePath] (a fully
- * qualified file path ending in `*.preferences_pb`). The platform Koin modules supply the path
- * (`context.filesDir` on Android, `NSDocumentDirectory` on iOS). Optional [migrations] run once when
- * the store is first read — Android uses this to import the legacy `SharedPreferences` values.
+ * qualified file path ending in '*.preferences_pb'). The platform Koin modules supply the path
+ * ('context.filesDir' on Android, 'NSDocumentDirectory' on iOS). Optional [migrations] run once when
+ * the store is first read - Android uses this to import the legacy 'SharedPreferences' values.
  */
 fun createPreferenceDataStore(
     migrations: List<DataMigration<Preferences>> = emptyList(),
@@ -29,14 +29,14 @@ fun createPreferenceDataStore(
     )
 
 /**
- * [PreferenceStore] backed by **DataStore Multiplatform** — the unified replacement for the
- * per-platform key/value stores (iOS `NSUserDefaults`, Android `SharedPreferences`).
+ * [PreferenceStore] backed by **DataStore Multiplatform** - the unified replacement for the
+ * per-platform key/value stores (iOS 'NSUserDefaults', Android 'SharedPreferences').
  *
- * DataStore is asynchronous (suspend `edit` / `Flow` reads), while the settings code is written
+ * DataStore is asynchronous (suspend 'edit' / 'Flow' reads), while the settings code is written
  * against a synchronous store. This bridges the two: the latest [Preferences] snapshot is cached in
  * memory (hydrated once at construction and refreshed after every write, since this store is the
  * sole writer of its file), so reads are synchronous and lock-free while writes block briefly to
- * persist — mirroring `SharedPreferences`/`NSUserDefaults` semantics.
+ * persist - mirroring 'SharedPreferences'/'NSUserDefaults' semantics.
  */
 class DataStorePreferenceStore(
     private val dataStore: DataStore<Preferences>
@@ -80,7 +80,7 @@ class DataStorePreferenceStore(
 
 /**
  * Runs [block] to completion on the calling thread. Bridges the synchronous [PreferenceStore]
- * facade onto DataStore's suspend API; `kotlinx.coroutines.runBlocking` is only available on the
+ * facade onto DataStore's suspend API; 'kotlinx.coroutines.runBlocking' is only available on the
  * concurrent (JVM/Native) targets, so it is provided per platform.
  */
 internal expect fun <T> runBlockingPreferences(block: suspend () -> T): T

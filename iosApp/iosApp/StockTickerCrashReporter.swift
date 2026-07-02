@@ -4,7 +4,7 @@ import Shared
 import FirebaseCrashlytics
 #endif
 
-/// Platform implementation of the shared `CrashReporter`. The shared `AppLogger` forwards every error
+/// Platform implementation of the shared 'CrashReporter'. The shared 'AppLogger' forwards every error
 /// and warning here; this records errors as Firebase Crashlytics non-fatals and warnings as
 /// breadcrumbs when the Crashlytics SDK is linked.
 ///

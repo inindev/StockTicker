@@ -37,39 +37,36 @@ class WidgetDataProvider constructor(
     }
 
     suspend fun refreshWidgetDataList(): List<WidgetData> {
+        val widgetDataList = allIds().distinct().map { dataForWidgetId(it) }
+        // Each widget renders its associated watchlist, so refresh its symbols from the store before
+        // publishing.
+        widgetDataList.forEach { it.refreshFromWatchlist() }
+        val sorted = widgetDataList.sortedBy { it.widgetName() }
+        _widgetData.emit(sorted)
+        return sorted
+    }
+
+    private fun allIds(): List<Int> {
         val appWidgetIds = getAppWidgetIds().toMutableSet()
         if (appWidgetIds.isEmpty()) {
             appWidgetIds.add(AppWidgetManager.INVALID_APPWIDGET_ID)
         }
-        val widgetDataList = appWidgetIds.map {
-            dataForWidgetId(it)
-        }.sortedBy { it.widgetName() }
-        _widgetData.emit(widgetDataList)
-        return widgetDataList
+        return appWidgetIds.toList()
+    }
+
+    /** Returns the widget's data with its symbols freshly loaded from its watchlist. */
+    suspend fun refreshWidgetData(widgetId: Int): WidgetData {
+        val widgetData = dataForWidgetId(widgetId)
+        widgetData.refreshFromWatchlist()
+        return widgetData
     }
 
     fun dataForWidgetId(widgetId: Int): WidgetData {
+        // Symbols are loaded from the associated watchlist via [WidgetData.refreshFromWatchlist],
+        // not seeded from the stocks provider.
         val widgetData = synchronized(widgets) {
-            if (widgets.containsKey(widgetId)) {
-                val widgetData = widgets[widgetId]!!
-                if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID && widgetData.getTickers().isEmpty()) {
-                    widgetData.addAllFromStocksProvider()
-                }
-                widgetData
-            } else {
-                val appWidgetIds = getAppWidgetIds()
-                // check if size is 1 because the first widget just got added
-                val position = appWidgetIds.indexOf(widgetId) + 1
-                val widgetData: WidgetData = if (appWidgetIds.size == 1) {
-                    WidgetData(position, widgetId, true)
-                } else {
-                    WidgetData(position, widgetId)
-                }
-                if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID && widgetData.getTickers().isEmpty()) {
-                    widgetData.addAllFromStocksProvider()
-                }
-                widgets[widgetId] = widgetData
-                widgetData
+            widgets.getOrPut(widgetId) {
+                WidgetData(widgetId)
             }
         }
         widgetData.refreshStocksList()
@@ -78,7 +75,9 @@ class WidgetDataProvider constructor(
 
     suspend fun broadcastUpdateWidget(widgetId: Int) {
         refreshWidgetDataList()
-        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+        // Only real home-screen widgets (positive app-widget ids) have a Glance widget to update; the
+        // default in-app list (0) has none.
+        if (widgetId > 0) {
             try {
                 dataForWidgetId(widgetId).emitWidgetChanges()
                 GlanceStocksWidget().update(context, glanceAppWidgetManager.getGlanceIdBy(widgetId))
@@ -101,21 +100,6 @@ class WidgetDataProvider constructor(
     val hasWidget: Flow<Boolean> by lazy {
         widgetData.map {
             hasWidget()
-        }
-    }
-
-    suspend fun containsTicker(ticker: String): Boolean {
-        refreshWidgetDataList()
-        return widgets.any { it.value.getTickers().contains(ticker) }
-    }
-
-    fun updateWidgets(tickerList: List<String>) {
-        if (hasWidget()) {
-            dataForWidgetId(getAppWidgetIds()[0])
-                .addTickers(tickerList)
-        } else {
-            dataForWidgetId(AppWidgetManager.INVALID_APPWIDGET_ID)
-                .addTickers(tickerList)
         }
     }
 }

@@ -18,15 +18,16 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * Koin definitions for the app's ViewModels, replacing Hilt's `@HiltViewModel`. AndroidViewModels
+ * Koin definitions for the app's ViewModels, replacing Hilt's '@HiltViewModel'. AndroidViewModels
  * receive the [android.app.Application] via [androidApplication]; [SuggestionViewModel] is created
- * with an assisted `symbol` parameter passed through `parametersOf` at the call site.
+ * with an assisted 'symbol' parameter passed through 'parametersOf' at the call site.
  */
 val viewModelModule = module {
-    viewModel { WidgetsViewModel(get(), get()) }
+    viewModel { WidgetsViewModel(get(), get(), get()) }
     viewModel {
         HomeViewModel(
             androidApplication(),
+            get(),
             get(),
             get(),
             get(),
@@ -49,5 +50,5 @@ val viewModelModule = module {
         QuoteDetailViewModel(get(), get(), get(), get())
     }
     viewModel { NewsFeedViewModel(get()) }
-    viewModel { (symbol: String) -> SuggestionViewModel(symbol, get()) }
+    viewModel { (symbol: String) -> SuggestionViewModel(symbol, get(), get()) }
 }

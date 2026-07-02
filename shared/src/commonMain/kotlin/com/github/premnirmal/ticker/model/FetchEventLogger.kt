@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
  *
  * Like [com.github.premnirmal.ticker.network.StocksApi] and
  * [com.github.premnirmal.ticker.network.NewsProvider] this is a plain class declared in the Koin
- * graph (no `Timber`/`Dispatchers.IO`/Hilt — the multiplatform `AppLogger` and `ioDispatcher`); its
- * public contract is unchanged, so the existing `:app` callers keep working and iOS shares the same
+ * graph (no 'Timber'/'Dispatchers.IO'/Hilt - the multiplatform 'AppLogger' and 'ioDispatcher'); its
+ * public contract is unchanged, so the existing ':app' callers keep working and iOS shares the same
  * logger.
  */
 class FetchEventLogger(

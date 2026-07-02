@@ -20,7 +20,7 @@ fun formatAxisDate(value: Double): String =
 fun formatAxisHour(value: Double): String =
     dateTimeOf(value).toLocalTime().format(AppPreferences.TIME_FORMATTER)
 
-/** Formats a chart y-axis value (a price) as a short, compact label (e.g. `52.7K`). */
+/** Formats a chart y-axis value (a price) as a short, compact label (e.g. '52.7K'). */
 fun formatAxisValue(value: Double): String =
     CompactNumberFormat.format(value)
 

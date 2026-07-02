@@ -2,11 +2,11 @@ package com.github.premnirmal.ticker.components
 
 import platform.Foundation.NSLog
 
-// NSLog is a C variadic function. Passing a Kotlin String as a `%@`/`%s`
+// NSLog is a C variadic function. Passing a Kotlin String as a '%@'/'%s'
 // variadic argument crashes with EXC_BAD_ACCESS because Kotlin/Native does not
 // bridge varargs to Objective-C objects. Instead, build the full message in
 // Kotlin and pass it as the (properly bridged) format-string parameter with no
-// variadic args, escaping any `%` so it is not interpreted as a format token.
+// variadic args, escaping any '%' so it is not interpreted as a format token.
 private fun nsLog(text: String) {
     NSLog(text.replace("%", "%%"))
 }

@@ -20,13 +20,13 @@ private object MainKoin : KoinComponent {
 
 /**
  * Compose Multiplatform entry point for the iOS app. Wraps the shared Compose UI in a
- * [UIViewController] that the SwiftUI shell hosts (via a `UIViewControllerRepresentable`). Exposed to
- * Swift as `MainViewControllerKt.MainViewController()`.
+ * [UIViewController] that the SwiftUI shell hosts (via a 'UIViewControllerRepresentable'). Exposed to
+ * Swift as 'MainViewControllerKt.MainViewController()'.
  *
- * The active [SelectedTheme] is observed from the shared [UserPreferences] `themePrefFlow`, so the
+ * The active [SelectedTheme] is observed from the shared [UserPreferences] 'themePrefFlow', so the
  * theme chosen in the Settings tab is applied live (Light/Dark/Follow system).
  *
- * Koin must already be started (see `IosModuleKt.doInitKoinIos` in `StockTickerApp.swift`) so the
+ * Koin must already be started (see 'IosModuleKt.doInitKoinIos' in 'StockTickerApp.swift') so the
  * shared screens can resolve their dependencies from the graph.
  */
 fun MainViewController(): UIViewController = ComposeUIViewController {

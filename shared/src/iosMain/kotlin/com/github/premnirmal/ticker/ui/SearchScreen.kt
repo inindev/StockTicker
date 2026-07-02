@@ -41,8 +41,8 @@ private object SearchKoin : KoinComponent {
 /**
  * Drives the shared [SearchScreen] on iOS: it debounces symbol queries through the shared
  * [SuggestionsProvider], loads the trending stocks through the shared [NewsProvider] and toggles a
- * symbol's membership of the watchlist through the shared [IStocksProvider]. Unlike Android — where
- * symbols are added to a specific Glance widget — iOS has a single watchlist, so the add/remove
+ * symbol's membership of the watchlist through the shared [IStocksProvider]. Unlike Android - where
+ * symbols are added to a specific Glance widget - iOS has a single watchlist, so the add/remove
  * action operates on the shared portfolio directly.
  */
 class IosSearchViewModel(
@@ -117,7 +117,7 @@ class IosSearchViewModel(
 /**
  * iOS Search tab. Renders the shared [SearchScreen] with iOS-native Material 3 slots: a lightweight
  * trending [quoteCard], a [suggestionItem] whose trailing button adds/removes the symbol from the
- * watchlist, and the shared `ic_close` clear icon. Tapping a trending quote or a suggestion navigates
+ * watchlist, and the shared 'ic_close' clear icon. Tapping a trending quote or a suggestion navigates
  * to the shared quote-detail destination via [onQuoteClick].
  */
 @Composable

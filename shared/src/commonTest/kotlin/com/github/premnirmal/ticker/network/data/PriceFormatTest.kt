@@ -7,8 +7,8 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
- * Verifies [PriceFormat] — migrated into commonMain together with the multiplatform
- * [com.github.premnirmal.ticker.components.DecimalFormatter] / [AppNumberFormat] abstraction —
+ * Verifies [PriceFormat] - migrated into commonMain together with the multiplatform
+ * [com.github.premnirmal.ticker.components.DecimalFormatter] / [AppNumberFormat] abstraction -
  * formats prices on every Kotlin Multiplatform target.
  */
 class PriceFormatTest {

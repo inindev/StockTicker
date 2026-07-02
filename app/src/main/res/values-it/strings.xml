@@ -118,7 +118,6 @@
   <string name="already_in_portfolio">%1$s è già nel tuo portfolio</string>
   <string name="added_to_list">%1$s aggiunto al tuo portfolio</string>
   <string name="next_fetch">Prossimo aggiornamento: %1$s</string>
-  <string name="last_fetch">Ultimo aggiornamento: %1$s</string>
   <string name="last_and_next_fetch">Ultimo aggiornamento: %1$s\nProssimo aggiornamento: %2$s</string>
   <string name="total_holdings">Totale Partecipazioni: %1$s</string>
   <string name="cannot_export_msg">Impossibile esportare quotazioni senza il permesso scrittura sullo spazio di archiviazione esterno</string>
@@ -185,4 +184,5 @@
   <string name="loading">Caricamento</string>
    <string name="exact_alarm_permission_required_message">L\'autorizzazione agli allarmi esatti è necessaria per aggiornare il widget tempestivamente.</string>
    <string name="go_to_settings">Concedi</string>
+  <string name="updated_at">Aggiornato %1$s</string>
  </resources>

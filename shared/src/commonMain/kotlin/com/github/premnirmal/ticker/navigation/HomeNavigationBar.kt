@@ -36,7 +36,7 @@ import com.github.premnirmal.ticker.ui.NavigationContentPosition.TOP
  * Vertical space reserved for content sitting behind a floating bottom bar. Retained so screens that
  * read it unconditionally keep compiling; the bar is now a solid, non-floating [NavigationBar] laid
  * out beneath the content (not overlaying it), so no extra bottom padding is required and this stays
- * at its `0.dp` default.
+ * at its '0.dp' default.
  */
 val LocalContentBottomPadding = compositionLocalOf { 0.dp }
 

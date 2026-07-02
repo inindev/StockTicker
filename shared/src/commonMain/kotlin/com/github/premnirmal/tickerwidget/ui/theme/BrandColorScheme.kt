@@ -6,9 +6,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 /**
- * The cross-platform brand colour palette — the single source of truth for the app's non-dynamic
- * Material 3 colours, shared by Android (the pre-`S`/non-dynamic fallback) and iOS. Android may still
- * override these with Material You dynamic colours when available; see `AppTheme`.
+ * The cross-platform brand colour palette - the single source of truth for the app's non-dynamic
+ * Material 3 colours, shared by Android (the pre-'S'/non-dynamic fallback) and iOS. Android may still
+ * override these with Material You dynamic colours when available; see 'AppTheme'.
  */
 internal object BrandColors {
   val light_primary = Color(0xFF006E08)

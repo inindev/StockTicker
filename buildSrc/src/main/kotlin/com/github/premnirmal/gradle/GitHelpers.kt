@@ -9,7 +9,17 @@ fun Project.execAndGetStdout(vararg args: String): String =
   }.standardOutput.asText.get().trim()
 
 fun Project.getVersionNameFromGit(): String =
-  execAndGetStdout("git", "describe", "--tags", "--abbrev=0")
+  try {
+    execAndGetStdout("git", "describe", "--tags", "--abbrev=0")
+  } catch (e: Exception) {
+    // No reachable tag (fresh clone, tags not fetched, or shallow checkout). Fall back to a
+    // valid X.Y.Z so the versionName/versionCode parsing in app/build.gradle.kts still works.
+    // Mirrors the iOS fallback in iosApp/version.sh.
+    println("No git tag found, defaulting version to $FALLBACK_VERSION: ${e.message}")
+    FALLBACK_VERSION
+  }
+
+private const val FALLBACK_VERSION = "4.0.0"
 
 fun Project.getOldGitVersionFromGit(): String =
   try {
@@ -34,8 +44,9 @@ fun Project.getCommitsBetween(old: String, new: String): String =
       }
     log.replace("\n", "\\n")
   } catch (e: Exception) {
-    println(e.message)
-    println(e.stackTrace)
-    throw e
+    // The tag range doesn't exist (e.g. no tags on a fresh clone). Degrade to an empty changelog
+    // rather than breaking the build; a tagless checkout simply has no "what's new" entries.
+    println("Could not read commits between $old and $new, using empty changelog: ${e.message}")
+    ""
   }
 

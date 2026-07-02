@@ -33,12 +33,12 @@ private object WhatsNewKoin : KoinComponent {
 }
 
 /**
- * Drives the iOS "What's new" changelog bottom sheet. It mirrors Android's
- * `HomeViewModel.showWhatsNew()`, which loads the changelog from the shared [CommitsProvider] (the
+ * Drives the iOS "Whats new" changelog bottom sheet. It mirrors Androids
+ * 'HomeViewModel.showWhatsNew()', which loads the changelog from the shared [CommitsProvider] (the
  * git history baked into the build) and presents it. On iOS the Settings "What's new" row calls
  * [show] to load the changelog and present the [WhatsNewBottomSheet]; [checkShowOnLaunch] presents it
  * automatically the first time the app is launched after an update, recording the build version the
- * way Android's `HomeViewModel.checkShowWhatsNew()` does via the shared [UserPreferences].
+ * way Android's 'HomeViewModel.checkShowWhatsNew()' does via the shared [UserPreferences].
  */
 class WhatsNewController(
     private val commitsProvider: CommitsProvider,
@@ -55,7 +55,7 @@ class WhatsNewController(
     /**
      * Presents the bottom sheet only when [currentVersionCode] is newer than the last build for which
      * it was shown, i.e. on the first launch after an app update. Mirrors Android's
-     * `HomeViewModel.checkShowWhatsNew()`.
+     * 'HomeViewModel.checkShowWhatsNew()'.
      */
     fun checkShowOnLaunch(currentVersionCode: Int) {
         if (userPreferences.getLastSavedVersionCode() < currentVersionCode) {
@@ -94,7 +94,7 @@ fun rememberWhatsNewController(): WhatsNewController =
 
 /**
  * iOS "What's new" bottom sheet. A [ModalBottomSheet] listing the changelog as bullet points,
- * matching Android's bottom sheet from `HomeViewModel.showWhatsNew()`. The changelog itself is
+ * matching Android's bottom sheet from 'HomeViewModel.showWhatsNew()'. The changelog itself is
  * produced by the shared [CommitsProvider], so both platforms display the same content. Shown by a
  * [WhatsNewController].
  */

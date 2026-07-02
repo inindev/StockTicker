@@ -146,7 +146,6 @@
   <string name="already_in_portfolio">%1$s is already in your portfolio</string>
   <string name="added_to_list">%1$s added to your portfolio</string>
   <string name="next_fetch">Next fetch: %1$s</string>
-  <string name="last_fetch">Last fetch: %1$s</string>
   <string name="last_and_next_fetch">Last fetch: %1$s\nNext fetch: %2$s</string>
   <string name="updated_at">Updated %1$s</string>
   <string name="total_holdings">Total Holdings: %1$s</string>
@@ -160,6 +159,7 @@
   <string name="no_symbols">¯\\_(ツ)_/¯\nNo symbols</string>
   <string name="error_fetching_news">¯\\_(ツ)_/¯\nError fetching news</string>
   <string name="widget_name">Widget name</string>
+  <string name="watchlist">Watchlist</string>
   <string name="widget_name_updated">Widget name updated</string>
   <string name="set">Set</string>
   <string name="current_positions">Current Positions</string>
@@ -183,6 +183,7 @@
   <string name="max">∞</string>
   <string name="error_loading_graph">Error loading graph</string>
   <string name="widgets">Widgets</string>
+  <string name="stock_widget">Stock Widget</string>
   <string name="tutorial">Tutorial</string>
   <string name="how_to_title">How to add a widget</string>
   <string name="how_to">- Long-press an empty space on your home screen to bring up the menu\n- Now select the \'Widgets\' option.\n- Select the \'Stocks Widget\' item from the list of widgets.\n- Edit the widget in the opened settings screen.\n- You can add multiple widgets each with their own portfolio.</string>

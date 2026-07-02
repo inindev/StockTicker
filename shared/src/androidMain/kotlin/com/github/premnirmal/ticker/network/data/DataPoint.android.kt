@@ -10,7 +10,7 @@ import java.time.ZoneId
 
 /**
  * Android [DataPoint]: a plain, multiplatform-friendly candle (timestamp + high/low/open/close) that
- * is also `Serializable`/`Parcelable` (so it can be passed through an `Intent`) and orders by its
+ * is also 'Serializable'/'Parcelable' (so it can be passed through an 'Intent') and orders by its
  * timestamp. The chart is rendered with Vico, which reads the raw values directly, so [DataPoint] no
  * longer extends any charting-library type.
  */

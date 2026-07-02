@@ -8,8 +8,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Verifies that [Properties] — migrated into commonMain together with the
- * [com.github.premnirmal.shared.CommonParcelable] abstraction — serializes on every
+ * Verifies that [Properties] - migrated into commonMain together with the
+ * [com.github.premnirmal.shared.CommonParcelable] abstraction - serializes on every
  * Kotlin Multiplatform target.
  */
 class PropertiesSerializationTest {
@@ -34,7 +34,7 @@ class PropertiesSerializationTest {
 
     @Test
     fun isEmptyReflectsContent() {
-        // NB: isEmpty() is counter-intuitively named — it returns true when the
+        // NB: isEmpty() is counter-intuitively named - it returns true when the
         // Properties has content (notes set, or an alert configured), false otherwise.
         assertFalse(Properties(symbol = "AAPL").isEmpty())
         assertTrue(Properties(symbol = "AAPL", notes = "note").isEmpty())

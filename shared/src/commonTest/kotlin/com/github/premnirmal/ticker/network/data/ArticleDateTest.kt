@@ -6,7 +6,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Unit tests for [ArticleDate], the multiplatform RSS `pubDate` parser used to order news articles
+ * Unit tests for [ArticleDate], the multiplatform RSS 'pubDate' parser used to order news articles
  * and render their short date labels.
  */
 class ArticleDateTest {

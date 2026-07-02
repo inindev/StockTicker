@@ -3,15 +3,15 @@ package com.github.premnirmal.ticker.components
 import kotlin.math.abs
 
 /**
- * Formats a price into a short, "compact" label for chart axes. Full prices like `52,682.975`
- * are far too wide for a value axis, so this abbreviates large magnitudes with a `K`/`M`/`B`/`T`
+ * Formats a price into a short, "compact" label for chart axes. Full prices like '52,682.975'
+ * are far too wide for a value axis, so this abbreviates large magnitudes with a 'K'/'M'/'B'/'T'
  * suffix and keeps just enough precision to stay readable. The result is kept to roughly 4-5
  * characters (plus a sign):
  *
- * - `52682.975` -> `52.7K`
- * - `1234567.0` -> `1.23M`
- * - `152.34`    -> `152.3`
- * - `52.18`     -> `52.18`
+ * - '52682.975' -> '52.7K'
+ * - '1234567.0' -> '1.23M'
+ * - '152.34'    -> '152.3'
+ * - '52.18'     -> '52.18'
  *
  * Values below 1000 keep more precision (smaller charts often span a narrow price band) while
  * larger magnitudes are scaled down so neighbouring axis labels stay distinct without overflowing.

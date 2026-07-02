@@ -8,13 +8,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Guards the Room KMP migration chain ported from the previous Android-only `SupportSQLiteDatabase`
+ * Guards the Room KMP migration chain ported from the previous Android-only 'SupportSQLiteDatabase'
  * migrations. The chain must stay contiguous from version 1 up to the current [QuotesDB] version so
  * existing installs migrate transparently on every platform.
  */
 class MigrationsTest {
 
-    private val databaseVersion = 9
+    private val databaseVersion = 10
 
     @Test
     fun allMigrations_formContiguousChainUpToDatabaseVersion() {

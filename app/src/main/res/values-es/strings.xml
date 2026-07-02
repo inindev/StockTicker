@@ -116,7 +116,6 @@
   <string name="already_in_portfolio">%1$s ya está en su cartera</string>
   <string name="added_to_list">%1$s añadido a su cartera</string>
   <string name="next_fetch">Próxima: %1$s</string>
-  <string name="last_fetch">Última: %1$s</string>
   <string name="last_and_next_fetch">Última: %1$s\nPróxima: %2$s</string>
   <string name="total_holdings">Total Valor: %1$s</string>
   <string name="cannot_export_msg">No se pueden exportar citas sin permiso para escribir en un almacenamiento externo</string>
@@ -183,4 +182,5 @@
   <string name="loading">Cargando</string>
    <string name="exact_alarm_permission_required_message">Se requiere el permiso de alarma exacta para actualizar el widget de manera oportuna.</string>
    <string name="go_to_settings">Otorgar</string>
+  <string name="updated_at">Actualizado %1$s</string>
  </resources>

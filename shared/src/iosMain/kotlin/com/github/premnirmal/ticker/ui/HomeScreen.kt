@@ -48,8 +48,8 @@ private object HomeKoin : KoinComponent {
 /**
  * iOS entry screen hosting the full shared multiplatform [RootNavigationGraph].
  *
- * A root [NavHostController] drives the shared [RootNavigationGraph], whose `homeContent` slot is the
- * home navigation chrome ([HomeContent]) and whose `quoteDetailContent` slot is the iOS
+ * A root [NavHostController] drives the shared [RootNavigationGraph], whose 'homeContent' slot is the
+ * home navigation chrome ([HomeContent]) and whose 'quoteDetailContent' slot is the iOS
  * [QuoteDetailScreen]. The home tabs navigate to the quote-detail destination through the same root
  * controller, so the iOS app shares the Android navigation structure. The Watchlist tab renders the
  * shared [WatchlistScreen]; the remaining tabs are lightweight placeholders until their view models
@@ -219,8 +219,8 @@ private fun HomeContent(
  * The Watchlist home tab. On a compact window it renders the plain [WatchlistScreen] and navigates to
  * a full-screen quote detail through [onQuoteClick] (the iPhone behaviour). On a wide window
  * ([ContentType.DUAL_PANE], i.e. iPad / wide Split View) it shows the shared [ListDetail] with the
- * watchlist on the left and the selected quote's detail on the right — mirroring Android's
- * `WatchlistScreen` list/detail. The detail pane forces `SINGLE_PANE` so its own internal layout
+ * watchlist on the left and the selected quote's detail on the right - mirroring Android's
+ * 'WatchlistScreen' list/detail. The detail pane forces 'SINGLE_PANE' so its own internal layout
  * stays a single column.
  */
 @OptIn(ExperimentalComposeUiApi::class)

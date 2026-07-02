@@ -12,10 +12,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
  * One-shot DataStore migration that imports the settings [AppPreferences] used to read from the
  * legacy [SharedPreferences] file ([AppPreferences.PREFS_NAME]) into the unified DataStore
  * Preferences store. It only copies the keys that [AppPreferences] owns, leaving the keys still read
- * directly from `SharedPreferences` by other components (e.g. `StocksProvider`, the tickers store)
+ * directly from 'SharedPreferences' by other components (e.g. 'StocksProvider', the tickers store)
  * untouched.
  *
- * The `UPDATE_DAYS` key was persisted as a `Set<String>` in `SharedPreferences`; DataStore's
+ * The 'UPDATE_DAYS' key was persisted as a 'Set<String>' in 'SharedPreferences'; DataStore's
  * synchronous [com.github.premnirmal.ticker.settings.PreferenceStore] facade stores it as a
  * comma-separated string, so this migration performs that conversion.
  */

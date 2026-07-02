@@ -6,7 +6,7 @@ package com.github.premnirmal.ticker.components
  * is the iOS analogue of Android's Timber-to-Crashlytics tree.
  *
  * Crashlytics auto-captures actual crashes (native signals and uncaught Kotlin exceptions), but
- * errors that the shared code *catches and logs* never reach it on their own — this sink bridges
+ * errors that the shared code *catches and logs* never reach it on their own - this sink bridges
  * those. Defaults to [NoopCrashReporter] (the FOSS build, or before the app wires a real reporter) so
  * the shared logger never depends on a backend being present.
  */
@@ -23,10 +23,10 @@ object NoopCrashReporter : CrashReporter
 
 /**
  * Mutable holder for the active [CrashReporter]. The iOS app installs its reporter at launch (via
- * `initKoinIos`); [AppLogger]'s iOS sink forwards errors/warnings here.
+ * 'initKoinIos'); [AppLogger]'s iOS sink forwards errors/warnings here.
  *
  * A plain holder (rather than a Koin lookup) is used deliberately: [AppLogger] is invoked from inside
- * the iOS Koin module's coroutine `CoroutineExceptionHandler`, so resolving the reporter through Koin
+ * the iOS Koin module's coroutine 'CoroutineExceptionHandler', so resolving the reporter through Koin
  * would be re-entrant.
  */
 object IosCrashReporter {

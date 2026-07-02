@@ -228,7 +228,7 @@ class DbViewerViewModel constructor(
             sb.append("<tr>")
                 .append("<td>${wd.widgetName}</td>")
             val tickers = StringBuilder()
-            wd.getTickers().forEachIndexed { i, symbol ->
+            wd.tickers.value.forEachIndexed { i, symbol ->
                 tickers.append(symbol)
                 tickers.append(", ")
                 if (i % 5 == 0) {

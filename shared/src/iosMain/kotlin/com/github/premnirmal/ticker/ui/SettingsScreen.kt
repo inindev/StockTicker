@@ -70,8 +70,8 @@ private val DAYS = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday
 
 /**
  * Drives the shared [com.github.premnirmal.ticker.settings.SettingsScreen] on iOS over the shared
- * [UserPreferences]. Unlike Android — whose settings are derived from the selected Glance widget's
- * `WidgetData` — iOS has no in-app widgets, so [SettingsData.hasWidgets] is always `false` and the
+ * [UserPreferences]. Unlike Android - whose settings are derived from the selected Glance widget's
+ * 'WidgetData' - iOS has no in-app widgets, so [SettingsData.hasWidgets] is always 'false' and the
  * theme/interval/update-window/round/notification toggles read and write the shared preferences
  * directly, rebuilding the [settings] snapshot on each change so the screen recomposes.
  */
@@ -240,8 +240,8 @@ internal fun iosVersionName(): String {
 }
 
 /**
- * The app's display name (`CFBundleDisplayName`, falling back to `CFBundleName`), the iOS analogue of
- * Android's flavor-specific `app_name` string. Used as the watchlist header title so it mirrors the
+ * The app's display name ('CFBundleDisplayName', falling back to 'CFBundleName'), the iOS analogue of
+ * Android's flavor-specific 'app_name' string. Used as the watchlist header title so it mirrors the
  * Android header.
  */
 internal fun iosAppName(): String {
@@ -252,8 +252,8 @@ internal fun iosAppName(): String {
 }
 
 /**
- * The current build number (`CFBundleVersion`) as an integer, the iOS analogue of Android's
- * `versionCode`. Used to detect launches following an app update. Returns `0` when the value is
+ * The current build number ('CFBundleVersion') as an integer, the iOS analogue of Android's
+ * 'versionCode'. Used to detect launches following an app update. Returns '0' when the value is
  * missing or non-numeric.
  */
 internal fun iosVersionCode(): Int {

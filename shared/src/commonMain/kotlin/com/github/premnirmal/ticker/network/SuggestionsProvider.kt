@@ -11,9 +11,9 @@ import com.github.premnirmal.ticker.network.data.SuggestionsNet.SuggestionNet
  * the user can add a ticker the search did not return.
  *
  * Like [StocksApi]/[NewsProvider]/[CommitsProvider] it is a plain, Android-free class declared in the
- * shared Koin `sharedModule`, so the Android `SearchViewModel` and the future iOS / shared
+ * shared Koin 'sharedModule', so the Android 'SearchViewModel' and the future iOS / shared
  * presentation layer bind to the same logic. The platform-specific concerns that wrapped this in
- * `SearchViewModel` — the debounce delay and the error snackbar — stay in the view model.
+ * 'SearchViewModel' - the debounce delay and the error snackbar - stay in the view model.
  */
 class SuggestionsProvider(
     private val stocksApi: StocksApi

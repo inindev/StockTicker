@@ -117,7 +117,6 @@
   <string name="already_in_portfolio">%1$s est déjà dans votre portefeuille</string>
   <string name="added_to_list">%1$s ajouté dans votre portefeuille</string>
   <string name="next_fetch">Prochaine récupération : %1$s</string>
-  <string name="last_fetch">Dernière récupération : %1$s</string>
   <string name="last_and_next_fetch">Dernière récupération : %1$s\nProchaine récupération : %2$s</string>
   <string name="total_holdings">Total Parts : %1$s</string>
   <string name="cannot_export_msg">Export des actions impossible sans la permission d\'écrire sur la mémoire de stockage externe</string>
@@ -184,4 +183,5 @@
   <string name="loading">Chargement</string>
    <string name="exact_alarm_permission_required_message">L\'autorisation d\'alarme exacte est requise pour actualiser le widget en temps voulu.</string>
    <string name="go_to_settings">Accorder</string>
+  <string name="updated_at">Mis à jour %1$s</string>
  </resources>

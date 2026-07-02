@@ -16,22 +16,22 @@ import androidx.compose.ui.Modifier
  * Multiplatform list/detail layout shared by Android and iOS.
  *
  * When [showListAndDetail] is true the [list] and [detail] are placed side by side in a weighted
- * [Row] (the cross-platform replacement for Accompanist's `TwoPane`, which is Android-only and
- * fold-aware; folds are irrelevant on iPad). Otherwise a single pane is shown — the [list] until a
+ * [Row] (the cross-platform replacement for Accompanist's 'TwoPane', which is Android-only and
+ * fold-aware; folds are irrelevant on iPad). Otherwise a single pane is shown - the [list] until a
  * detail is opened ([isDetailOpen]), then the [detail], with a system back press returning to the
  * list via [setIsDetailOpen].
  *
- * The [list] and [detail] are wrapped in [movableContentOf] + `SaveableStateProvider` so their state
+ * The [list] and [detail] are wrapped in [movableContentOf] + 'SaveableStateProvider' so their state
  * is preserved across single/dual-pane transitions (e.g. an iPad rotation or Split View resize) and
  * while one pane is hidden.
  *
- * System back handling is platform-specific (Android's `OnBackPressedDispatcher` vs the iOS
+ * System back handling is platform-specific (Android's 'OnBackPressedDispatcher' vs the iOS
  * edge-swipe gesture), so it is supplied by the caller via [backHandler]: when only the detail is
- * shown, the layout invokes `backHandler { setIsDetailOpen(false) }` so a back gesture returns to the
+ * shown, the layout invokes 'backHandler { setIsDetailOpen(false) }' so a back gesture returns to the
  * list. In dual-pane mode no back handler is registered.
  *
  * @param splitFraction fraction of the width given to the [list] pane in dual-pane mode (the [detail]
- *   takes the remainder); matches Android's `HorizontalTwoPaneStrategy(splitFraction)`.
+ *   takes the remainder); matches Android's 'HorizontalTwoPaneStrategy(splitFraction)'.
  */
 @Composable
 fun ListDetail(

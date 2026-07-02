@@ -10,14 +10,14 @@ import io.ktor.http.appendPathSegments
 /**
  * Multiplatform client for the Yahoo Finance chart (historical data) endpoint. Replaces the
  * Android-only Retrofit interface; the public contract
- * (`suspend fun fetchChartData(symbol, interval, range): HistoricalDataResult`) is unchanged so
+ * ('suspend fun fetchChartData(symbol, interval, range): HistoricalDataResult') is unchanged so
  * existing callers do not need to be modified.
  *
- * The Yahoo endpoint requires the browser `User-Agent`/cookie/crumb authentication that lives in the
+ * The Yahoo endpoint requires the browser 'User-Agent'/cookie/crumb authentication that lives in the
  * Android OkHttp stack, so callers pass an [httpClient] backed by that client (see the Android
- * `createHttpClient(OkHttpClient)` factory).
+ * 'createHttpClient(OkHttpClient)' factory).
  *
- * @param baseUrl the Yahoo Finance API base URL (e.g. `https://query1.finance.yahoo.com/v8/finance/`).
+ * @param baseUrl the Yahoo Finance API base URL (e.g. 'https://query1.finance.yahoo.com/v8/finance/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class ChartApi(

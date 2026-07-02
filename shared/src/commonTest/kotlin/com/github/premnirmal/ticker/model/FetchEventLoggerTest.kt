@@ -3,7 +3,6 @@ package com.github.premnirmal.ticker.model
 import com.github.premnirmal.ticker.components.AppClock
 import com.github.premnirmal.ticker.repo.QuoteDao
 import com.github.premnirmal.ticker.repo.StocksStorage
-import com.github.premnirmal.ticker.repo.TickersStore
 import com.github.premnirmal.ticker.repo.data.FetchLogRow
 import com.github.premnirmal.ticker.repo.data.HoldingRow
 import com.github.premnirmal.ticker.repo.data.PropertiesRow
@@ -28,7 +27,7 @@ class FetchEventLoggerTest {
     @Test
     fun log_persistsEntryWithClockTime() = runTest {
         val dao = RecordingQuoteDao()
-        val storage = StocksStorage(EmptyTickersStore, dao)
+        val storage = StocksStorage(dao)
         val logger = FetchEventLogger(storage, fixedClock, CoroutineScope(coroutineContext))
 
         logger.log(source = "provider", event = "refresh", detail = "ok")
@@ -43,18 +42,13 @@ class FetchEventLoggerTest {
     @Test
     fun log_truncatesLongDetail() = runTest {
         val dao = RecordingQuoteDao()
-        val storage = StocksStorage(EmptyTickersStore, dao)
+        val storage = StocksStorage(dao)
         val logger = FetchEventLogger(storage, fixedClock, CoroutineScope(coroutineContext))
 
         logger.log(source = "provider", event = "refresh", detail = "x".repeat(1_000))
 
         val row = dao.inserted.await()
         assertEquals(400, row.detail.length)
-    }
-
-    private object EmptyTickersStore : TickersStore {
-        override fun saveTickers(tickers: Set<String>) = Unit
-        override fun readTickers(): Set<String> = emptySet()
     }
 
     /** Minimal [QuoteDao] that only records [insertFetchLog]; every other call is unused here. */

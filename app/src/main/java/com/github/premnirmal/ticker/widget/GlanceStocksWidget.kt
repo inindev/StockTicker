@@ -84,8 +84,9 @@ class GlanceStocksWidget : GlanceAppWidget(), KoinComponent {
     ) {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
 
-        // Update the Glance state with current widget data and quotes
-        val widgetData = widgetDataProvider.dataForWidgetId(appWidgetId)
+        // Update the Glance state with current widget data and quotes (symbols come from the
+        // widget's associated watchlist).
+        val widgetData = widgetDataProvider.refreshWidgetData(appWidgetId)
         updateAppWidgetState(
             context = context,
             definition = stateDefinition,
@@ -349,7 +350,7 @@ private fun Header(
 ) {
     val context = LocalContext.current
     val lastUpdatedText = when (widgetData.fetchState) {
-        is SerializableFetchState.Success -> context.getString(R.string.last_fetch, widgetData.fetchState.displayString)
+        is SerializableFetchState.Success -> context.getString(R.string.updated_at, widgetData.fetchState.displayString)
         is SerializableFetchState.Failure -> context.getString(R.string.refresh_failed)
         else -> SerializableFetchState.NotFetched.displayString
     }
@@ -364,7 +365,8 @@ private fun Header(
             style = TextStyle(
                 color = ColorProvider(R.color.text_widget_header),
                 fontSize = TextUnit(fontSize, TextUnitType.Sp),
-                textAlign = TextAlign.Start,
+                // Right-justify to match the home screen when there's no refresh button beside it.
+                textAlign = if (widgetData.showRefreshButton) TextAlign.Start else TextAlign.End,
                 fontWeight = FontWeight.Normal,
             ),
         )
@@ -702,7 +704,7 @@ class RefreshCallback : ActionCallback, KoinComponent {
 
         stocksProvider.fetch()
 
-        val widgetData = widgetDataProvider.dataForWidgetId(appWidgetId)
+        val widgetData = widgetDataProvider.refreshWidgetData(appWidgetId)
         val currentQuotes = widgetData.stocks.value
         val currentFetchState = stocksProvider.fetchState.value
         updateAppWidgetState(
@@ -733,7 +735,7 @@ class FlipTextCallback : ActionCallback, KoinComponent {
     ) {
         val glanceAppWidgetManager = GlanceAppWidgetManager(context)
         val appWidgetId = glanceAppWidgetManager.getAppWidgetId(glanceId)
-        val widgetData = widgetDataProvider.dataForWidgetId(appWidgetId)
+        val widgetData = widgetDataProvider.refreshWidgetData(appWidgetId)
         val currentQuotes = widgetData.stocks.value
         val currentFetchState = stocksProvider.fetchState.value
         // Update Glance state with the flipped change type

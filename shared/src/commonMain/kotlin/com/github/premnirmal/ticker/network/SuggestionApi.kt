@@ -9,14 +9,14 @@ import io.ktor.client.request.parameter
 /**
  * Multiplatform client for the Yahoo Finance symbol-search (suggestions) endpoint. Replaces the
  * Android-only Retrofit interface; the public contract
- * (`suspend fun getSuggestions(query: String): SuggestionsNet`) is unchanged so existing callers do
+ * ('suspend fun getSuggestions(query: String): SuggestionsNet') is unchanged so existing callers do
  * not need to be modified.
  *
- * The Yahoo endpoint requires the browser `User-Agent`/cookie/crumb authentication that lives in the
+ * The Yahoo endpoint requires the browser 'User-Agent'/cookie/crumb authentication that lives in the
  * Android OkHttp stack, so callers pass an [httpClient] backed by that client (see the Android
- * `createHttpClient(OkHttpClient)` factory).
+ * 'createHttpClient(OkHttpClient)' factory).
  *
- * @param baseUrl the Yahoo Finance API base URL (e.g. `https://query2.finance.yahoo.com/v1/finance/`).
+ * @param baseUrl the Yahoo Finance API base URL (e.g. 'https://query2.finance.yahoo.com/v1/finance/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class SuggestionApi(

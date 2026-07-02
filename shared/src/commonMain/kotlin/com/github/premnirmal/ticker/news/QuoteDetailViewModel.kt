@@ -27,11 +27,11 @@ import kotlinx.coroutines.launch
 /**
  * Shared (Android + iOS) ViewModel backing the quote-detail screen. It depends only on the
  * multiplatform [IStocksProvider]/[UserPreferences] contracts and the already-shared
- * [NewsProvider]/[HistoryProvider], so it lives in `commonMain`.
+ * [NewsProvider]/[HistoryProvider], so it lives in 'commonMain'.
  *
- * The Android-coupled, localised "quote details" list (string resources + `Context` formatting) is
+ * The Android-coupled, localised "quote details" list (string resources + 'Context' formatting) is
  * intentionally not built here; the host derives it from [quote] instead. Snackbar messages are
- * exposed as the [messages] flow rather than coupling to the Android `AppMessaging`.
+ * exposed as the [messages] flow rather than coupling to the Android 'AppMessaging'.
  */
 class QuoteDetailViewModel constructor(
     private val stocksProvider: IStocksProvider,

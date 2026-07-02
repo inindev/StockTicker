@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 
 /**
  * Android app theme. Delegates to the shared cross-platform [SharedAppTheme] (shared brand colour
- * scheme + `appTypography` + `appShapes`), supplying a Material You dynamic [ColorScheme] override on
+ * scheme + 'appTypography' + 'appShapes'), supplying a Material You dynamic [ColorScheme] override on
  * Android 12+ (where it falls back to the shared brand scheme otherwise).
  */
 @Composable fun AppTheme(

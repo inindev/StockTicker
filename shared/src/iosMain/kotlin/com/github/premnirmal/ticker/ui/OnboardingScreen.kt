@@ -50,7 +50,7 @@ private data class OnboardingPage(
 /**
  * Drives the iOS first-run onboarding tutorial. It mirrors Android's tutorial, which is gated on the
  * shared [UserPreferences.tutorialShown] preference (Android shows it as a bottom sheet from
- * `HomeViewModel.checkShowTutorial()`). On iOS the same preference decides whether to present the
+ * 'HomeViewModel.checkShowTutorial()'). On iOS the same preference decides whether to present the
  * onboarding flow on first launch, and the Settings "Tutorial" row re-opens it on demand via [show].
  */
 class OnboardingController(private val prefs: UserPreferences) {

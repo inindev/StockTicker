@@ -9,7 +9,21 @@
     <string name="add">Add</string>
     <string name="total_holdings">Total Holdings: %1$s</string>
     <string name="select_widget">Select Widget</string>
+    <string name="add_to_watchlist">Add to Watchlist</string>
+    <string name="add_to_watchlist_subtitle">Choose which watchlists %1$s appears in.</string>
+    <string name="new_watchlist">New Watchlist</string>
+    <string name="watchlist_name">Watchlist name</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="watchlist_exists">A watchlist with that name already exists</string>
+    <string name="watchlist_name_blank">Enter a name</string>
     <string name="save">Save</string>
+    <string name="manage_watchlists">Manage Watchlists</string>
+    <string name="manage_watchlists_subtitle">Create, rename, and delete watchlists.</string>
+    <string name="rename_watchlist">Rename Watchlist</string>
+    <string name="done">Done</string>
+    <string name="delete">Delete</string>
+    <string name="delete_watchlist_message">Delete \"%1$s\"? Its symbols stay in All Symbols.</string>
     <string name="last_and_next_fetch">Last fetch: %1$s\nNext fetch: %2$s</string>
     <string name="updated_at">Updated %1$s</string>
 </resources>

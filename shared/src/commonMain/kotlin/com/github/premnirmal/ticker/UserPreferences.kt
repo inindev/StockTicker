@@ -11,15 +11,15 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * This is the shared "preferences interface" of the multiplatform persistence story: it mirrors the
  * existing [com.github.premnirmal.ticker.repo.QuoteStorage] / [com.github.premnirmal.ticker.model.RefreshScheduler]
- * split — the common contract lives in `commonMain`, the concrete key/value store is platform
- * specific. On Android this is implemented by `AppPreferences` (backed by `SharedPreferences`); on
- * iOS by `UserDefaultsPreferences` (backed by a shared, DataStore-ready key/value store).
+ * split - the common contract lives in 'commonMain', the concrete key/value store is platform
+ * specific. On Android this is implemented by 'AppPreferences' (backed by 'SharedPreferences'); on
+ * iOS by 'UserDefaultsPreferences' (backed by a shared, DataStore-ready key/value store).
  *
  * The configured update window is part of this contract: it is expressed with the platform-neutral
- * [Time] value and ISO day-of-week numbers (Monday = 1 … Sunday = 7) instead of `java.time` types,
+ * [Time] value and ISO day-of-week numbers (Monday = 1 ... Sunday = 7) instead of 'java.time' types,
  * so it can be shared. The theme preference is fully shared too: [themePref] plus its derived
  * [selectedTheme] ([SelectedTheme]) and [nightMode] ([NightMode]) mappings live here, with the
- * Android-only `AppCompatDelegate` translation left to the `:app` module.
+ * Android-only 'AppCompatDelegate' translation left to the ':app' module.
  */
 interface UserPreferences {
 
@@ -42,7 +42,7 @@ interface UserPreferences {
   fun setTutorialShown(shown: Boolean)
 
   /**
-   * The build version that was installed the last time the "What's new" changelog was shown, or `-1`
+   * The build version that was installed the last time the "Whats new" changelog was shown, or -1'
    * if it has never been recorded. Used to detect launches following an app update.
    */
   fun getLastSavedVersionCode(): Int
@@ -87,7 +87,7 @@ interface UserPreferences {
 
   /**
    * The effective night mode, derived from [themePref]. Android maps this onto
-   * `AppCompatDelegate`'s `MODE_NIGHT_*` constants.
+   * 'AppCompatDelegate's 'MODE_NIGHT_*' constants.
    */
   val nightMode: NightMode
     get() = when (themePref) {
@@ -107,22 +107,22 @@ interface UserPreferences {
   /** The configured start of the daily update window (default 09:30). */
   fun startTime(): Time
 
-  /** Persists the start of the daily update window from an `"HH:mm"` string. */
+  /** Persists the start of the daily update window from an "HH:mm" string. */
   fun setStartTime(time: String)
 
   /** The configured end of the daily update window (default 16:00). */
   fun endTime(): Time
 
-  /** Persists the end of the daily update window from an `"HH:mm"` string. */
+  /** Persists the end of the daily update window from an "HH:mm" string. */
   fun setEndTime(time: String)
 
   /**
-   * The selected update days as ISO day-of-week numbers (Monday = 1 … Sunday = 7). Defaults to the
+   * The selected update days as ISO day-of-week numbers (Monday = 1 ... Sunday = 7). Defaults to the
    * weekdays when nothing is selected.
    */
   fun updateDays(): Set<Int>
 
-  /** Persists the selected update days as ISO day-of-week numbers (Monday = 1 … Sunday = 7). */
+  /** Persists the selected update days as ISO day-of-week numbers (Monday = 1 ... Sunday = 7). */
   fun setUpdateDays(days: Set<Int>)
 
   companion object {

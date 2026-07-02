@@ -33,12 +33,12 @@ import com.github.premnirmal.ticker.ui.TopBar
  * Trending/news feed screen, shared by Android and iOS. The platform-specific inputs are hoisted as
  * parameters so the screen has no Android dependencies:
  *  - the localised labels ([newsFeedTitle]/[errorText]) as [String]s,
- *  - the article and quote cards as composable slots ([newsCard]/[quoteCard]) — they still pull in
+ *  - the article and quote cards as composable slots ([newsCard]/[quoteCard]) - they still pull in
  *    the (not-yet-shared) image loading + theme on Android,
- *  - the list fading-edge decoration as [listFadingEdges] (Android `RuntimeShader`),
+ *  - the list fading-edge decoration as [listFadingEdges] (Android 'RuntimeShader'),
  *  - the navigation scroll-to-top registration as [registerScrollToTop],
  *  - the quote tap as [onQuoteClick].
- * The Android `NewsFeedScreen` host in `:app` supplies them.
+ * The Android 'NewsFeedScreen' host in ':app' supplies them.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

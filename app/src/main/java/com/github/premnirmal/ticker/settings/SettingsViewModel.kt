@@ -161,7 +161,7 @@ class SettingsViewModel constructor(
     fun importPortfolio(context: Context, fileUri: Uri) {
         val type = context.contentResolver.getType(fileUri)
         val task: ImportTask = if ("text/plain" == type) {
-            TickersImportTask(widgetDataProvider)
+            TickersImportTask(stocksProvider)
         } else {
             PortfolioImportTask(stocksProvider)
         }

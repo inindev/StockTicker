@@ -3,12 +3,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Shared
 
-/// iOS implementation of the shared `PortfolioDocumentBridge`.
+/// iOS implementation of the shared 'PortfolioDocumentBridge'.
 ///
-/// The shared `IosPortfolioExchange` (Kotlin) owns all serialization and the provider mutations and
-/// only calls out here for the native file presentation — the iOS analogue of Android's
-/// `ActivityResultContracts.CreateDocument` / `OpenDocument` launchers. This presents the system
-/// `UIDocumentPickerViewController` (export / import) and `UIActivityViewController` (share) from the
+/// The shared 'IosPortfolioExchange' (Kotlin) owns all serialization and the provider mutations and
+/// only calls out here for the native file presentation - the iOS analogue of Android's
+/// 'ActivityResultContracts.CreateDocument' / 'OpenDocument' launchers. This presents the system
+/// 'UIDocumentPickerViewController' (export / import) and 'UIActivityViewController' (share) from the
 /// key window's top-most view controller.
 final class PortfolioDocumentBridgeImpl: NSObject, PortfolioDocumentBridge {
 
@@ -102,7 +102,7 @@ final class PortfolioDocumentBridgeImpl: NSObject, PortfolioDocumentBridge {
     }
 }
 
-/// Bridges `UIDocumentPickerViewController` selection/cancellation back to a single completion.
+/// Bridges 'UIDocumentPickerViewController' selection/cancellation back to a single completion.
 private final class PortfolioDocumentPickerDelegate: NSObject, UIDocumentPickerDelegate {
 
     private let completion: (URL?) -> Void

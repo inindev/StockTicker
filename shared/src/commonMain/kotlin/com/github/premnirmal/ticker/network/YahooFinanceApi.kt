@@ -9,12 +9,12 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.isSuccess
 
 /**
- * Result of a Yahoo Finance quotes request. Mirrors the small slice of `retrofit2.Response` that the
- * caller relied on (HTTP status code + parsed body) without leaking Retrofit/Ktor types into `:app`,
- * so the existing `401 -> reload crumb -> retry` handling in `StocksApi` keeps working unchanged.
+ * Result of a Yahoo Finance quotes request. Mirrors the small slice of 'retrofit2.Response' that the
+ * caller relied on (HTTP status code + parsed body) without leaking Retrofit/Ktor types into ':app',
+ * so the existing '401 -> reload crumb -> retry' handling in 'StocksApi' keeps working unchanged.
  *
  * @param statusCode the HTTP status code of the response.
- * @param response the parsed [YahooResponse], or `null` when the request was not successful.
+ * @param response the parsed [YahooResponse], or 'null' when the request was not successful.
  */
 data class YahooQuoteResult(
     val statusCode: Int,
@@ -25,14 +25,14 @@ data class YahooQuoteResult(
 
 /**
  * Multiplatform client for the Yahoo Finance quotes endpoint. Replaces the Android-only Retrofit
- * `YahooFinance` interface; the public contract (`suspend fun getStocks(query): YahooQuoteResult`)
+ * 'YahooFinance' interface; the public contract ('suspend fun getStocks(query): YahooQuoteResult')
  * exposes the HTTP status code and parsed body so existing caller logic does not need to change.
  *
- * The Yahoo endpoint requires the browser `User-Agent`/cookie/crumb authentication that lives in the
+ * The Yahoo endpoint requires the browser 'User-Agent'/cookie/crumb authentication that lives in the
  * Android OkHttp stack, so callers pass an [httpClient] backed by that client (see the Android
- * `createHttpClient(OkHttpClient)` factory).
+ * 'createHttpClient(OkHttpClient)' factory).
  *
- * @param baseUrl the Yahoo Finance API base URL (e.g. `https://query1.finance.yahoo.com/`).
+ * @param baseUrl the Yahoo Finance API base URL (e.g. 'https://query1.finance.yahoo.com/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class YahooFinanceApi(

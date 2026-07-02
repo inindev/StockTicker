@@ -155,6 +155,17 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.github.premnirmal.TodayStocks.Widget
         INFOPLIST_FILE: StockTickerWidget/Info.plist
         CODE_SIGN_ENTITLEMENTS: StockTickerWidget/StockTickerWidget.entitlements
+        # Xcode 16 defaults Debug builds to the "debug dylib" mechanism: all target
+        # code is compiled into StockTickerWidget.debug.dylib and the extension's
+        # main executable becomes a thin stub that loads it. That breaks WidgetKit's
+        # AppIntents configuration: the runtime resolves the WidgetConfigurationIntent
+        # by its mangled name (17StockTickerWidget…ConfigurationIntentV) in the
+        # *executable* image — now just the stub — so it fails with "the type with
+        # this mangled name does not exist in the process's memory space", leaving
+        # `configuration.watchlist` permanently nil (entities(for:) never runs).
+        # Disabling the debug dylib keeps the intent type in the extension binary the
+        # AppIntents metadata points at, so per-widget watchlist selection works.
+        ENABLE_DEBUG_DYLIB: NO
         # Allow the Gradle run-script phase below to write the framework into
         # the build directory (script sandboxing would otherwise block it).
         ENABLE_USER_SCRIPT_SANDBOXING: NO

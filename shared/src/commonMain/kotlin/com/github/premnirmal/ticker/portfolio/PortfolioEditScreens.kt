@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,7 +51,7 @@ import com.github.premnirmal.ticker.ui.TopBar
 
 /**
  * Per-ticker note editor, shared by Android and iOS. Android resources (the localised labels and the
- * back/done [Painter]s) and the navigation side effects (`finish()`/`setResult()`) are hoisted as
+ * back/done [Painter]s) and the navigation side effects ('finish()'/'setResult()') are hoisted as
  * parameters so the screen has no platform dependencies; the Android [NotesActivity] supplies them.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +91,7 @@ fun NotesScreen(
                     }
                 },
                 actions = {
-                    IconButton(
+                    FilledIconButton(
                         modifier = Modifier.align(Alignment.CenterVertically),
                         onClick = {
                             viewModel.setNotes(notes.text)
@@ -183,7 +184,7 @@ fun DisplaynameScreen(
                     }
                 },
                 actions = {
-                    IconButton(
+                    FilledIconButton(
                         modifier = Modifier.align(Alignment.CenterVertically),
                         onClick = {
                             viewModel.setDisplayname(displayname.text)
@@ -239,7 +240,7 @@ private const val MAX_VALUE_LENGTH = 12
 /**
  * Per-ticker price-alert editor, shared by Android and iOS. The localised strings and back [Painter]
  * are hoisted as parameters, and the parse/validate/persist of the entered values is delegated to
- * [onSave] (which returns the `above`/`below` error flags) so the locale-aware number parsing stays
+ * [onSave] (which returns the 'above'/'below' error flags) so the locale-aware number parsing stays
  * on the host. [AlertsActivity] supplies these.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -364,9 +365,9 @@ fun AlertsScreen(
  * Per-ticker "add position" / holdings editor, shared by Android and iOS. The localised strings and
  * the back/remove [Painter]s are hoisted as parameters, the holdings number formatting is delegated
  * to [formatNumber], and the parse/validate/persist of the entered values is delegated to [onAdd]
- * (which returns the `price`/`shares` error flags) so the locale-aware number parsing stays on the
+ * (which returns the 'price'/'shares' error flags) so the locale-aware number parsing stays on the
  * host. The optional [twoPane] slot lets the host supply an adaptive two-pane layout (Android uses
- * Accompanist `TwoPane`); when it is `null` the screen renders a single column. [HoldingsActivity]
+ * Accompanist 'TwoPane'); when it is 'null' the screen renders a single column. [HoldingsActivity]
  * supplies these.
  */
 @OptIn(ExperimentalMaterial3Api::class)

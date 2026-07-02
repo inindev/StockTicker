@@ -1,15 +1,15 @@
 package com.github.premnirmal.ticker.network.data
 
 /**
- * Parsed representation of an RSS `pubDate` value. Multiplatform replacement for the previous
- * `java.time`-based parsing in `NewsArticle` (which used `DateTimeFormatter.RFC_1123_DATE_TIME` with
- * an ISO-8601 `Instant` fallback): it exposes a [sortKey] for ordering (newest first) and the
+ * Parsed representation of an RSS 'pubDate' value. Multiplatform replacement for the previous
+ * 'java.time'-based parsing in 'NewsArticle' (which used 'DateTimeFormatter.RFC_1123_DATE_TIME' with
+ * an ISO-8601 'Instant' fallback): it exposes a [sortKey] for ordering (newest first) and the
  * [month]/[day] used to render the short "MMM d" label.
  *
  * @param sortKey epoch seconds derived from the parsed fields (UTC), used only for ordering. Mirrors
  * the previous behaviour of treating the written wall-clock time as the sortable value.
- * @param month 1-based month (1 = January), or `0` when the date could not be parsed.
- * @param day day of month, or `0` when the date could not be parsed.
+ * @param month 1-based month (1 = January), or '0' when the date could not be parsed.
+ * @param day day of month, or '0' when the date could not be parsed.
  */
 internal data class ArticleDate(
     val sortKey: Long,
@@ -71,7 +71,7 @@ internal data class ArticleDate(
             return ArticleDate(sortKey = epochSeconds, month = month, day = day)
         }
 
-        /** Multiplatform floored integer division (matches `Math.floorDiv`, which is JVM-only). */
+        /** Multiplatform floored integer division (matches 'Math.floorDiv', which is JVM-only). */
         private fun floorDiv(x: Long, y: Long): Long {
             var q = x / y
             if ((x xor y) < 0 && q * y != x) q--

@@ -32,7 +32,7 @@ import org.robolectric.annotation.Config
  * services and a ViewModel so any missing binding or wrong constructor wiring fails the build.
  *
  * Definitions whose construction touches the bundled-SQLite Room engine (the persistence graph) are
- * intentionally not resolved here; the persistence wiring is covered by the `:shared` Room tests.
+ * intentionally not resolved here; the persistence wiring is covered by the ':shared' Room tests.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestApplication::class)

@@ -3,18 +3,25 @@ import SwiftUI
 import AppIntents
 import Shared
 
-/// The data a single widget timeline entry renders. Built from the shared `WidgetSnapshot` written by
-/// the app to the App Group store (`WidgetSnapshotStore`), filtered/sorted per the widget's own
-/// `StockTickerConfigurationIntent`.
+/// The data a single widget timeline entry renders. Built from the shared 'WidgetSnapshot' written by
+/// the app to the App Group store ('WidgetSnapshotStore'), filtered/sorted per the widget's own
+/// 'StockTickerConfigurationIntent'.
 struct StockTickerEntry: TimelineEntry {
     let date: Date
     let quotes: [WidgetQuoteRow]
     let isPlaceholder: Bool
-    /// The per-widget configuration controlling appearance (header, change amount, bold, …).
+    /// The name of the watchlist actually rendered (the selected one, or All Symbols on fallback).
+    /// Used only for the empty-state message - the header shows the "Updated ..." time, matching Android.
+    let watchlistName: String
+    /// The fetch time as the shared compact "9:21a" label (see 'WidgetSnapshot.lastUpdatedLabel'),
+    /// rendered as "Updated 9:21a" in the header to match the app's watchlist top bar and the Android
+    /// widget. Empty when nothing has been fetched yet.
+    let updatedLabel: String
+    /// The per-widget configuration controlling appearance (header, change amount, bold, ...).
     let configuration: StockTickerConfigurationIntent
 }
 
-/// A flattened, Swift-value copy of the shared `WidgetQuoteSnapshot` (so SwiftUI views don't hold
+/// A flattened, Swift-value copy of the shared 'WidgetQuoteSnapshot' (so SwiftUI views don't hold
 /// Kotlin objects).
 struct WidgetQuoteRow: Identifiable {
     let id = UUID()
@@ -28,15 +35,16 @@ struct WidgetQuoteRow: Identifiable {
 }
 
 /// Reads the shared App Group snapshot and supplies the WidgetKit timeline, applying each widget
-/// instance's own `StockTickerConfigurationIntent` (watchlist selection + appearance).
+/// instance's own 'StockTickerConfigurationIntent' (watchlist selection + appearance).
 ///
 /// The widget extension runs in its own process, so it cannot reach the app's Koin graph / Room
 /// database. It instead reads the compact JSON snapshot the app persists after every refresh through
-/// the shared `WidgetSnapshotStore` (the iOS counterpart of Android's `WidgetDataProvider`).
+/// the shared 'WidgetSnapshotStore' (the iOS counterpart of Android's 'WidgetDataProvider').
 struct StockTickerProvider: AppIntentTimelineProvider {
 
     func placeholder(in context: Context) -> StockTickerEntry {
         StockTickerEntry(date: Date(), quotes: Self.sampleRows, isPlaceholder: true,
+                         watchlistName: "All Symbols", updatedLabel: "9:21a",
                          configuration: StockTickerConfigurationIntent())
     }
 
@@ -53,7 +61,14 @@ struct StockTickerProvider: AppIntentTimelineProvider {
 
     private func loadEntry(for configuration: StockTickerConfigurationIntent) -> StockTickerEntry {
         let snapshot = WidgetSnapshotStore.companion.create().read()
-        var rows = (snapshot?.quotes ?? []).map { quote in
+        let watchlists = snapshot?.watchlists ?? []
+        // Per-widget watchlist selection: render the chosen watchlist (matched by name - see
+        // WatchlistOptionsProvider), falling back to All Symbols (the first entry) when the widget has
+        // no selection or its watchlist was deleted - matching Android's "re-point orphaned widget to
+        // All Symbols" behaviour.
+        let selected = watchlists.first { $0.name == configuration.watchlistName }
+            ?? watchlists.first
+        var rows = (selected?.quotes ?? []).map { quote in
             WidgetQuoteRow(
                 symbol: quote.symbol,
                 name: quote.name,
@@ -64,16 +79,15 @@ struct StockTickerProvider: AppIntentTimelineProvider {
                 positive: quote.positive
             )
         }
-        // Per-widget watchlist selection: keep only the chosen symbols (or all when none selected).
-        if let selected = configuration.selectedSymbols {
-            rows = rows.filter { selected.contains($0.symbol) }
-        }
         // Per-widget sort: optionally show the largest movers first.
         if configuration.sortByChange {
             rows.sort { abs($0.changeInPercent) > abs($1.changeInPercent) }
         }
         let date = snapshot.map { Date(timeIntervalSince1970: Double($0.lastUpdatedMillis) / 1000.0) } ?? Date()
-        return StockTickerEntry(date: date, quotes: rows, isPlaceholder: false, configuration: configuration)
+        return StockTickerEntry(date: date, quotes: rows, isPlaceholder: false,
+                                watchlistName: selected?.name ?? "",
+                                updatedLabel: snapshot?.lastUpdatedLabel ?? "",
+                                configuration: configuration)
     }
 
     private static let sampleRows: [WidgetQuoteRow] = [
@@ -138,8 +152,11 @@ private struct StockTickerGridView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
+            if entry.configuration.showHeader && !entry.updatedLabel.isEmpty {
+                WidgetUpdatedHeader(updatedLabel: entry.updatedLabel)
+            }
             if entry.quotes.isEmpty {
-                EmptyWatchlistView()
+                EmptyWatchlistView(watchlistName: entry.watchlistName)
             } else {
                 LazyVGrid(columns: gridColumns, alignment: .leading, spacing: 2) {
                     ForEach(entry.quotes.prefix(maxItems)) { row in
@@ -151,12 +168,31 @@ private struct StockTickerGridView: View {
     }
 }
 
+/// The widget header, matching the Android Glance widget: just the "Updated 9:21a" fetch-time label,
+/// right-aligned (iOS widgets have no refresh button, so it always trails). The time string is
+/// pre-formatted in shared code so it's identical to the app's watchlist top bar.
+struct WidgetUpdatedHeader: View {
+    let updatedLabel: String
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Spacer(minLength: 0)
+            Text("Updated \(updatedLabel)")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+    }
+}
+
 private struct EmptyWatchlistView: View {
+    var watchlistName: String = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Stocks Widget")
+            Text(watchlistName.isEmpty ? "Stocks Widget" : watchlistName)
                 .font(.headline)
-            Text("Open the app and add symbols to your watchlist.")
+            Text("This watchlist is empty. Add symbols to it in the app.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

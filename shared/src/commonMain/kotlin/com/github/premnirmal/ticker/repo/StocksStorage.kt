@@ -12,28 +12,19 @@ import com.github.premnirmal.ticker.repo.data.QuoteRow
 import kotlinx.coroutines.withContext
 
 /**
- * Multiplatform [QuoteStorage] implementation backed by the shared Room KMP engine ([QuoteDao]) plus
- * a small [TickersStore] for the watchlist symbol set. The Room transactions are expressed via
- * `@Transaction` DAO methods (multiplatform) rather than the Android-only `withTransaction`
- * extension, so the same implementation runs on Android and iOS.
+ * Multiplatform [QuoteStorage] implementation backed by the shared Room KMP engine ([QuoteDao]). The
+ * Room transactions are expressed via '@Transaction' DAO methods (multiplatform) rather than the
+ * Android-only 'withTransaction' extension, so the same implementation runs on Android and iOS.
+ * (The watched-symbol set lives in 'WatchlistRepository' - All Symbols - not here.)
  *
  * Created by premnirmal on 2/28/16.
  */
 class StocksStorage(
-    private val tickersStore: TickersStore,
     private val quoteDao: QuoteDao
 ) : QuoteStorage {
 
     companion object {
         private const val MAX_FETCH_LOG_ROWS = 500
-    }
-
-    override fun saveTickers(tickers: Set<String>) {
-        tickersStore.saveTickers(tickers)
-    }
-
-    override fun readTickers(): Set<String> {
-        return tickersStore.readTickers()
     }
 
     override suspend fun readQuotes(): List<Quote> {

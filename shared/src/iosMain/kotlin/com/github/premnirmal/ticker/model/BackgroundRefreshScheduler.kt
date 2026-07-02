@@ -16,13 +16,13 @@ import kotlinx.datetime.toLocalDateTime
 /**
  * iOS implementation of the shared [RefreshScheduler] contract.
  *
- * It is the iOS counterpart of Android's `AlarmScheduler`: it owns the same platform-neutral
- * update-window decisions ([isCurrentTimeWithinScheduledUpdateTime], [msToNextAlarm]) — a faithful
- * port of the Android calendar arithmetic, expressed with `kotlinx-datetime` instead of `java.time`
- * — while delegating the actual background submission to the platform [BackgroundTaskScheduler]
- * (a `BGTaskScheduler`/WidgetKit bridge the iOS app provides).
+ * It is the iOS counterpart of Android's 'AlarmScheduler': it owns the same platform-neutral
+ * update-window decisions ([isCurrentTimeWithinScheduledUpdateTime], [msToNextAlarm]) - a faithful
+ * port of the Android calendar arithmetic, expressed with 'kotlinx-datetime' instead of 'java.time'
+ * - while delegating the actual background submission to the platform [BackgroundTaskScheduler]
+ * (a 'BGTaskScheduler'/WidgetKit bridge the iOS app provides).
  *
- * iOS has no "exact alarm" permission concept, so [canScheduleExactAlarm] always returns `true`.
+ * iOS has no "exact alarm" permission concept, so [canScheduleExactAlarm] always returns 'true'.
  */
 class BackgroundRefreshScheduler(
     private val preferences: UserDefaultsPreferences,
@@ -55,7 +55,7 @@ class BackgroundRefreshScheduler(
     }
 
     /**
-     * Takes care of weekends and after hours. Mirrors `AlarmScheduler.msToNextAlarm`.
+     * Takes care of weekends and after hours. Mirrors 'AlarmScheduler.msToNextAlarm'.
      */
     override fun msToNextAlarm(lastFetchedMs: Long): Long {
         val nowInstant = nowInstant()

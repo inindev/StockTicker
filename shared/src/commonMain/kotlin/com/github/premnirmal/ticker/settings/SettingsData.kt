@@ -4,7 +4,7 @@ import com.github.premnirmal.ticker.Time
 
 /**
  * Snapshot of the user's settings, used as immutable state by the shared [SettingsScreen].
- * Parceling was removed because this is only held in-memory by the ViewModel's `StateFlow`.
+ * Parceling was removed because this is only held in-memory by the ViewModel's 'StateFlow'.
  */
 data class SettingsData(
     val hasWidgets: Boolean,

@@ -3,15 +3,15 @@ package com.github.premnirmal.ticker.model
 /**
  * Platform-neutral state of the most recent watchlist refresh, exposed by [IStocksProvider.fetchState].
  *
- * This used to live on the Android `StocksProvider` because [Success.displayString] formats the
- * fetch timestamp as a wall-clock string with `java.time`. That formatting is now behind the
- * [formatFetchTime] `expect`/`actual` boundary (Android `java.time`, iOS `kotlinx-datetime`), so the
- * whole state — and the `fetchState` flow — is part of the shared contract and is implemented
+ * This used to live on the Android 'StocksProvider' because [Success.displayString] formats the
+ * fetch timestamp as a wall-clock string with 'java.time'. That formatting is now behind the
+ * [formatFetchTime] 'expect'/'actual' boundary (Android 'java.time', iOS 'kotlinx-datetime'), so the
+ * whole state - and the 'fetchState' flow - is part of the shared contract and is implemented
  * identically on both platforms.
  */
 sealed class FetchState {
 
-    /** A short, human-readable label for the state (a formatted time, an error message or `"--"`). */
+    /** A short, human-readable label for the state (a formatted time, an error message or "--"). */
     abstract val displayString: String
 
     /** No refresh has completed yet. */
@@ -24,8 +24,8 @@ sealed class FetchState {
         override val displayString: String by lazy { formatFetchTime(fetchTime) }
 
         /**
-         * The fetch time as a compact wall-clock label for the watchlist top bar, e.g. `"9:21a"` /
-         * `"1:05p"` (12-hour, no leading-zero hour, `a`/`p` meridiem). See [formatUpdatedTime].
+         * The fetch time as a compact wall-clock label for the watchlist top bar, e.g. "9:21a" /
+         * "1:05p" (12-hour, no leading-zero hour, 'a'/'p' meridiem). See [formatUpdatedTime].
          */
         val updatedString: String by lazy { formatUpdatedTime(fetchTime) }
     }
@@ -37,19 +37,19 @@ sealed class FetchState {
 }
 
 /**
- * Formats a fetch timestamp ([epochMillis]) as a wall-clock string in the system time zone: `"HH:mm"`
- * when the timestamp is on the current day, otherwise `"HH:mm <ShortDay>"` (e.g. `"09:30 Mon"`).
+ * Formats a fetch timestamp ([epochMillis]) as a wall-clock string in the system time zone: "HH:mm"
+ * when the timestamp is on the current day, otherwise "HH:mm <ShortDay>" (e.g. "09:30 Mon").
  *
- * Backed by `java.time` on Android and `kotlinx-datetime` on iOS, mirroring the Android
- * `ZonedDateTime.createTimeString()` helper this replaced.
+ * Backed by 'java.time' on Android and 'kotlinx-datetime' on iOS, mirroring the Android
+ * 'ZonedDateTime.createTimeString()' helper this replaced.
  */
 internal expect fun formatFetchTime(epochMillis: Long): String
 
 /**
  * Formats a fetch timestamp ([epochMillis]) as a compact 12-hour wall-clock label in the system time
- * zone: a 1- or 2-digit hour, a two-digit minute and a single-letter meridiem — `"9:21a"`, `"1:05p"`,
- * `"12:00p"`. Used for the "Updated …" label in the watchlist top bar.
+ * zone: a 1- or 2-digit hour, a two-digit minute and a single-letter meridiem - "9:21a", "1:05p",
+ * "12:00p". Used for the "Updated ..." label in the watchlist top bar.
  *
- * Backed by `java.time` on Android and `kotlinx-datetime` on iOS, mirroring [formatFetchTime].
+ * Backed by 'java.time' on Android and 'kotlinx-datetime' on iOS, mirroring [formatFetchTime].
  */
 internal expect fun formatUpdatedTime(epochMillis: Long): String

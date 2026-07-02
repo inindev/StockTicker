@@ -8,7 +8,7 @@ import platform.Foundation.NSUserDomainMask
 
 /**
  * The iOS DataStore Preferences file path, stored in the app's Documents directory (alongside the
- * Room `quotes-db`). DataStore appends nothing, so the name carries the required `*.preferences_pb`
+ * Room 'quotes-db'). DataStore appends nothing, so the name carries the required '*.preferences_pb'
  * suffix.
  */
 @OptIn(ExperimentalForeignApi::class)

@@ -6,8 +6,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Verifies that [Position] and [Holding] — migrated into commonMain together with the
- * [com.github.premnirmal.shared.CommonParcelable] abstraction — serialize on every
+ * Verifies that [Position] and [Holding] - migrated into commonMain together with the
+ * [com.github.premnirmal.shared.CommonParcelable] abstraction - serialize on every
  * Kotlin Multiplatform target.
  */
 class PositionSerializationTest {

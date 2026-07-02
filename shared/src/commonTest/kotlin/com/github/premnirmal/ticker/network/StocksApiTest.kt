@@ -246,6 +246,37 @@ class StocksApiTest {
     }
 
     @Test
+    fun crumbBootstrapHarvestsCookiesFromFcYahoo() = runTest {
+        // Yahoo no longer sets the A1/A3 session cookies on finance.yahoo.com, so loadCrumb must first
+        // hit fc.yahoo.com to harvest them - otherwise getCrumb returns "Invalid Cookie" and every
+        // quote 401s. Assert that the initial-load client actually requests fc.yahoo.com during a 401
+        // bootstrap.
+        var yahooCalls = 0
+        val yahooEngine = MockEngine {
+            yahooCalls++
+            if (yahooCalls == 1) respondError(HttpStatusCode.Unauthorized)
+            else respond(quotesJson("AAPL"), HttpStatusCode.OK, jsonHeaders)
+        }
+        val initialLoadEngine = MockEngine { respond("<html>no token here</html>", HttpStatusCode.OK) }
+        val crumbEngine = MockEngine { respond("fresh-crumb", HttpStatusCode.OK) }
+
+        val api = stocksApi(
+            yahooEngine = yahooEngine,
+            crumbStore = FakeCrumbStore(stored = "stale-crumb"),
+            initialLoadEngine = initialLoadEngine,
+            crumbEngine = crumbEngine
+        )
+
+        val result = api.getStocks(listOf("AAPL"))
+
+        assertTrue(result.wasSuccessful)
+        assertTrue(
+            initialLoadEngine.requestHistory.any { it.url.host == "fc.yahoo.com" },
+            "loadCrumb should harvest cookies from fc.yahoo.com"
+        )
+    }
+
+    @Test
     fun getStocksRefreshesCrumbAndRetriesOn401() = runTest {
         var yahooCalls = 0
         val yahooEngine = MockEngine {

@@ -6,8 +6,8 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
 /**
- * The default locale's decimal separator. Backed by `android.icu.text.DecimalFormatSymbols` on
- * Android and `NSNumberFormatter` on iOS, so the input cleanup below accepts the same separator the
+ * The default locale's decimal separator. Backed by 'android.icu.text.DecimalFormatSymbols' on
+ * Android and 'NSNumberFormatter' on iOS, so the input cleanup below accepts the same separator the
  * platform uses for display.
  */
 expect fun localeDecimalSeparator(): Char

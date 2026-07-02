@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Platform-agnostic view of a single watchlist/widget shown as a tab in [WatchlistContent]. The
- * Android `WidgetData` is adapted to this interface by the `:app` host so the shared screen does not
- * depend on the Glance/`SharedPreferences`-backed widget model.
+ * Android 'WidgetData' is adapted to this interface by the ':app' host so the shared screen does not
+ * depend on the Glance/'SharedPreferences'-backed widget model.
  */
 interface WatchlistWidget {
     val name: String
@@ -18,7 +18,7 @@ interface WatchlistWidget {
 
 /**
  * Pre-formatted total holdings / gain / loss strings rendered by the total-holdings popup. The
- * locale-aware number formatting is done by the host (which owns the platform `NumberFormat`).
+ * locale-aware number formatting is done by the host (which owns the platform 'NumberFormat').
  */
 data class TotalGainLoss(
     val holdings: String,

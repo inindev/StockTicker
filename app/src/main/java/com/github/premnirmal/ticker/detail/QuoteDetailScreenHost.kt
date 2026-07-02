@@ -55,12 +55,12 @@ import org.koin.compose.koinInject
 /**
  * Android host for the shared [com.github.premnirmal.ticker.detail.QuoteDetailScreen]. Resolves the
  * Koin [QuoteDetailViewModel]/[AppPreferences], collects the ViewModel state, derives the localised
- * [QuoteDetailItem] rows (`buildQuoteDetails`), the change/up/down [ColourPalette] colours, the
- * localised [QuoteDetailStrings], the `ic_refresh`/`ic_add_to_list`/`ic_edit` icons, the
- * `AppCard`/`NewsCard`/`AddSymbolDialog`/`LinkText` slots, the platform chart formatters, the
- * `RuntimeShader`-based [fadingEdges], the [AppMessaging] snackbar host, the per-section
- * `Holdings`/`Alerts`/`Notes`/`Displayname` activity-result launchers and the adaptive Accompanist
- * [TwoPane] layout, owns the `loadQuote`/`fetchAll`/`fetchQuoteInRealTime`/`reset` lifecycle and the
+ * [QuoteDetailItem] rows ('buildQuoteDetails'), the change/up/down [ColourPalette] colours, the
+ * localised [QuoteDetailStrings], the 'ic_refresh'/'ic_add_to_list'/'ic_edit' icons, the
+ * 'AppCard'/'NewsCard'/'AddSymbolDialog'/'LinkText' slots, the platform chart formatters, the
+ * 'RuntimeShader'-based [fadingEdges], the [AppMessaging] snackbar host, the per-section
+ * 'Holdings'/'Alerts'/'Notes'/'Displayname' activity-result launchers and the adaptive Accompanist
+ * [TwoPane] layout, owns the 'loadQuote'/'fetchAll'/'fetchQuoteInRealTime'/'reset' lifecycle and the
  * range-change chart fetch, then delegates to the shared screen.
  */
 @Composable

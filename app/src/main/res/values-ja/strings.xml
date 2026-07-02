@@ -126,7 +126,6 @@
   <string name="already_in_portfolio">%1$s はすでにポートフォリオに追加されています</string>
   <string name="added_to_list">%1$s をポートフォリオに追加しました</string>
   <string name="next_fetch">次回の取得: %1$s</string>
-  <string name="last_fetch">前回の取得: %1$s</string>
   <string name="last_and_next_fetch">前回の取得: %1$s\n次回の取得: %2$s</string>
   <string name="total_holdings">保有株の合計: %1$s</string>
   <string name="cannot_export_msg">外部ストレージへの書き込み許可がないため、銘柄リストをエクスポートできません</string>
@@ -212,4 +211,5 @@
   <string name="date_format_long">yyyy年MM月dd日</string>
    <string name="exact_alarm_permission_required_message">ウィジェットを適切なタイミングで更新するには、正確なアラームの権限が必要です。</string>
    <string name="go_to_settings">許可</string>
+  <string name="updated_at">更新 %1$s</string>
  </resources>

@@ -5,12 +5,12 @@ package com.github.premnirmal.ticker.model
  * succeeding or failing, the source that triggered it, etc.) into the persisted fetch log.
  *
  * This is the shared "fetch logger" of the multiplatform persistence story: it mirrors the existing
- * [RefreshScheduler] / [IStocksProvider] / [com.github.premnirmal.ticker.repo.QuoteStorage] splits —
- * the common contract lives in `commonMain`, the concrete sink is platform specific. On Android this
- * is implemented by `FetchEventLogger`, which persists each entry through the Room-backed
- * `StocksStorage.addFetchLog` (a platform-typed operation that stays on the concrete implementation)
- * and reports failures through `Timber`. The implementation (`FetchEventLogger`) is itself shared in
- * `commonMain`, so Android and iOS use the same sink.
+ * [RefreshScheduler] / [IStocksProvider] / [com.github.premnirmal.ticker.repo.QuoteStorage] splits -
+ * the common contract lives in 'commonMain', the concrete sink is platform specific. On Android this
+ * is implemented by 'FetchEventLogger', which persists each entry through the Room-backed
+ * 'StocksStorage.addFetchLog' (a platform-typed operation that stays on the concrete implementation)
+ * and reports failures through 'Timber'. The implementation ('FetchEventLogger') is itself shared in
+ * 'commonMain', so Android and iOS use the same sink.
  */
 interface FetchLogger {
 

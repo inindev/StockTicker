@@ -49,9 +49,9 @@ private object DbViewerKoin : KoinComponent {
 }
 
 /**
- * iOS counterpart of Android's `DbViewerViewModel`. Reads the shared Room-backed [QuoteDao] and
+ * iOS counterpart of Android's 'DbViewerViewModel'. Reads the shared Room-backed [QuoteDao] and
  * renders the quotes/holdings/properties tables plus the recent fetch logs as a single HTML document,
- * exactly as the Android debug DB viewer does. iOS has no Glance widgets or `WorkManager`, so the
+ * exactly as the Android debug DB viewer does. iOS has no Glance widgets or 'WorkManager', so the
  * widget/scheduled-work sections are omitted.
  */
 class IosDbViewerViewModel(
@@ -208,7 +208,7 @@ private fun String.escapeHtml(): String =
     replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 /**
- * iOS debug database viewer. Mirrors Android's `DbViewerActivity`: it generates an HTML dump of the
+ * iOS debug database viewer. Mirrors Android's 'DbViewerActivity': it generates an HTML dump of the
  * shared database and renders it in a native [WKWebView] (JavaScript disabled) hosted via Compose
  * Multiplatform's [UIKitView] interop. Reached from the Settings tab by tapping the version label
  * five times, matching the Android "discover the DB" gesture.
@@ -217,7 +217,7 @@ private fun String.escapeHtml(): String =
 @Composable
 fun DbViewerScreen(onBack: () -> Unit) {
     // Allow the iOS edge-swipe "back" gesture to dismiss this full-screen viewer. It is presented
-    // via Settings' `showDbViewer` state rather than a NavHost back stack, so this handler is what
+    // via Settings' 'showDbViewer' state rather than a NavHost back stack, so this handler is what
     // routes the start-edge pan to [onBack] instead of letting it pop the Settings tab.
     BackHandler(onBack = onBack)
     val viewModel = remember { IosDbViewerViewModel(DbViewerKoin.quoteDao) }

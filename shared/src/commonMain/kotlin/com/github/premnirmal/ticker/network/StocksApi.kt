@@ -12,10 +12,10 @@ import kotlinx.coroutines.withContext
 /**
  * Orchestrates the Yahoo Finance endpoints (quotes, crumb/cookie bootstrap, suggestions) and maps
  * their responses into the shared [Quote]/[FetchResult] domain model. Migrated from the Android-only
- * `:app` module into `commonMain`: it no longer depends on `Timber` (now [AppLogger]),
- * `Dispatchers.IO` (now [ioDispatcher]), `AppPreferences` (now the [CrumbStore] abstraction) or
- * Hilt/`javax.inject` (constructed by the platform DI layer). The public contract is unchanged so
- * existing `:app` callers do not need to change.
+ * ':app' module into 'commonMain': it no longer depends on 'Timber' (now [AppLogger]),
+ * 'Dispatchers.IO' (now [ioDispatcher]), 'AppPreferences' (now the [CrumbStore] abstraction) or
+ * Hilt/'javax.inject' (constructed by the platform DI layer). The public contract is unchanged so
+ * existing ':app' callers do not need to change.
  *
  * Created by premnirmal on 3/3/16.
  */
@@ -46,6 +46,11 @@ class StocksApi(
     private suspend fun loadCrumb() {
         withContext(ioDispatcher) {
             try {
+                // Harvest the A1/A3 session cookies first. Yahoo stopped setting them on
+                // finance.yahoo.com, so without this the crumb endpoint returns "Invalid Cookie" and
+                // every quote 401s. fc.yahoo.com still issues them (see bootstrapCookies).
+                yahooFinanceInitialLoad.bootstrapCookies()
+
                 val initialLoad = yahooFinanceInitialLoad.initialLoad()
                 val html = initialLoad.html
                 val url = initialLoad.url

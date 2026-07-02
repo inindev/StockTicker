@@ -28,21 +28,21 @@ import platform.UserNotifications.UNUserNotificationCenter
 import kotlin.math.absoluteValue
 
 /**
- * iOS implementation of local notifications — the counterpart of Android's
- * `NotificationsHandler` (`app/.../notifications/NotificationsHandler.kt`).
+ * iOS implementation of local notifications - the counterpart of Android's
+ * 'NotificationsHandler' ('app/.../notifications/NotificationsHandler.kt').
  *
  * It mirrors the same two notification kinds Android delivers and that the "notification alerts"
  * settings toggle ([UserPreferences.notificationAlerts]) gates:
  *
- *  - **Price alerts** — per-quote *above* / *below* alerts the user configured, plus a generic
+ *  - **Price alerts** - per-quote *above* / *below* alerts the user configured, plus a generic
  *    "big move" alert when a quote swings by >= 8 % (rate-limited to once per 24 h per symbol).
- *  - **Daily summary** — a once-per-update-day digest of the day's biggest movers, delivered after
+ *  - **Daily summary** - a once-per-update-day digest of the day's biggest movers, delivered after
  *    the configured end of the update window ([UserPreferences.endTime]).
  *
- * The alert-evaluation logic is a faithful port of Android's `checkAlerts()` (same thresholds,
+ * The alert-evaluation logic is a faithful port of Android's 'checkAlerts()' (same thresholds,
  * same "clear the alert once fired" behaviour, same generic-alert rate limiting), driven off the
- * shared [IStocksProvider.fetchState] flow so a check runs after every quotes refresh — including
- * the `BGTaskScheduler` background refreshes. Delivery uses `UNUserNotificationCenter` directly
+ * shared [IStocksProvider.fetchState] flow so a check runs after every quotes refresh - including
+ * the 'BGTaskScheduler' background refreshes. Delivery uses 'UNUserNotificationCenter' directly
  * (iOS has no notification *channels*, so the Android channel/group setup has no analogue here).
  */
 @OptIn(ExperimentalForeignApi::class)
@@ -77,7 +77,7 @@ class LocalNotificationsHandler(
 
     /**
      * Starts observing the shared refresh state so price alerts and the daily summary are evaluated
-     * after every quotes refresh. Call once at app launch (mirrors Android's `initialize()`). The
+     * after every quotes refresh. Call once at app launch (mirrors Android's 'initialize()'). The
      * replayed initial state value is skipped so we only react to *new* refreshes.
      */
     fun initialize() {
@@ -128,7 +128,7 @@ class LocalNotificationsHandler(
 
     /**
      * Delivers the day's biggest-mover summary once per update day, after the configured
-     * [UserPreferences.endTime]. Mirrors Android's scheduled `DailySummaryNotificationReceiver`,
+     * [UserPreferences.endTime]. Mirrors Android's scheduled 'DailySummaryNotificationReceiver',
      * but is driven opportunistically off background refreshes (iOS cannot recompute dynamic
      * content from a pre-scheduled local notification).
      */

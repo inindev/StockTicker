@@ -21,9 +21,8 @@ import com.github.premnirmal.ticker.network.CrumbStore
 import com.github.premnirmal.ticker.notifications.NotificationsHandler
 import com.github.premnirmal.ticker.repo.QuoteStorage
 import com.github.premnirmal.ticker.repo.QuotesDB
-import com.github.premnirmal.ticker.repo.SharedPreferencesTickersStore
 import com.github.premnirmal.ticker.repo.StocksStorage
-import com.github.premnirmal.ticker.repo.TickersStore
+import com.github.premnirmal.ticker.repo.WatchlistRepository
 import com.github.premnirmal.ticker.repo.buildQuotesDB
 import com.github.premnirmal.ticker.repo.getQuotesDBBuilder
 import com.github.premnirmal.ticker.settings.DataStorePreferenceStore
@@ -40,11 +39,11 @@ import org.koin.dsl.module
 private const val PREFERENCES_FILE_NAME = "ticker.preferences_pb"
 
 /**
- * Android application graph. Replaces the former Hilt `AppModule` plus every
- * `@Inject constructor` class that Hilt used to wire automatically (preferences, providers,
+ * Android application graph. Replaces the former Hilt 'AppModule' plus every
+ * '@Inject constructor' class that Hilt used to wire automatically (preferences, providers,
  * scheduler, persistence, analytics).
  *
- * `AnalyticsImpl` is a per-flavor source-set class, so this single definition resolves to whichever
+ * 'AnalyticsImpl' is a per-flavor source-set class, so this single definition resolves to whichever
  * implementation the active flavor compiles.
  */
 val appModule = module {
@@ -83,6 +82,7 @@ val appModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -90,8 +90,9 @@ val appModule = module {
 
     single { buildQuotesDB(getQuotesDBBuilder(androidContext())) }
     single { get<QuotesDB>().quoteDao() }
-    single<TickersStore> { SharedPreferencesTickersStore(get()) }
-    single { StocksStorage(get(), get()) }
+    single { get<QuotesDB>().watchlistDao() }
+    single { WatchlistRepository(get()) }
+    single { StocksStorage(get()) }
     single<IStocksProvider> { get<StocksProvider>() }
     single<QuoteStorage> { get<StocksStorage>() }
 

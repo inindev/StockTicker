@@ -15,7 +15,7 @@ import com.github.premnirmal.tickerwidget.ui.theme.SelectedTheme
  * Thin Android host for the shared [NewsCard][com.github.premnirmal.ticker.news.NewsCard].
  *
  * Supplies the Android-coupled inputs the shared card hoists: the Custom Tabs article tap, the
- * `ColourPalette` image placeholder colour and the `AppCard` container (it lives in `:UI`).
+ * 'ColourPalette' image placeholder colour and the 'AppCard' container (it lives in ':UI').
  */
 @Composable
 fun NewsCard(item: NewsArticle) {

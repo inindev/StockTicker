@@ -55,7 +55,7 @@ private const val AXIS_LABEL_COUNT = 5
 internal const val X_AXIS_LABEL_COUNT = 6
 
 // Vico rounds the GCD of the x-value deltas to this many decimals when deriving the axis step; see
-// `Double.gcdWith` in Vico (DOUBLE_GCD_DECIMALS). We replicate it so [xAxisLabelSpacing] computes the
+// 'Double.gcdWith' in Vico (DOUBLE_GCD_DECIMALS). We replicate it so [xAxisLabelSpacing] computes the
 // same number of axis steps Vico will, and therefore the same number of labels.
 private const val DOUBLE_GCD_DECIMALS = 4
 
@@ -69,7 +69,7 @@ private const val Y_RANGE_PADDING_FRACTION = 0.1
  * A [CartesianLayerRangeProvider] that scales the value axis to the data's own min/max (with a small
  * padding) instead of Vico's default behaviour of anchoring the minimum at zero. Stock prices are
  * always positive, so the default provider would compress the whole price line into a thin, flat
- * band near the top of a `0..max` axis; fitting the range to the data restores the visible movement.
+ * band near the top of a '0..max' axis; fitting the range to the data restores the visible movement.
  */
 internal object PriceRangeProvider : CartesianLayerRangeProvider {
     override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
@@ -95,12 +95,12 @@ internal object PriceRangeProvider : CartesianLayerRangeProvider {
  * The number of axis "steps" between consecutive bottom-axis labels needed to keep the visible label
  * count around [X_AXIS_LABEL_COUNT].
  *
- * Vico's `aligned` item placer positions labels every `spacing` axis steps, where one step is the
- * axis's `xStep` — the greatest common divisor of the gaps between consecutive x-values (see
- * [xDeltaGcd]). The total number of steps spanning the data is therefore `(maxX - minX) / xStep`,
+ * Vico's 'aligned' item placer positions labels every 'spacing' axis steps, where one step is the
+ * axis's 'xStep' - the greatest common divisor of the gaps between consecutive x-values (see
+ * [xDeltaGcd]). The total number of steps spanning the data is therefore '(maxX - minX) / xStep',
  * which is **not** the same as the point count: weekend/holiday gaps and the limited precision of the
- * `Float` epoch-second timestamps make the GCD small, so the step count can be far larger (e.g. ~350
- * for a year of daily data). Spacing the labels by `ceil(steps / X_AXIS_LABEL_COUNT)` (at least 1)
+ * 'Float' epoch-second timestamps make the GCD small, so the step count can be far larger (e.g. ~350
+ * for a year of daily data). Spacing the labels by 'ceil(steps / X_AXIS_LABEL_COUNT)' (at least 1)
  * caps them at roughly the target count for any range, fixing the unreadably granular axis that
  * results from labelling every step.
  *
@@ -118,7 +118,7 @@ internal fun xAxisLabelSpacing(xValues: List<Double>): Int {
 
 /**
  * The greatest common divisor of the differences between consecutive [xValues], matching Vico's
- * `getXDeltaGcd`/`Double.gcdWith` so [xAxisLabelSpacing] derives the same axis step Vico uses.
+ * 'getXDeltaGcd'/'Double.gcdWith' so [xAxisLabelSpacing] derives the same axis step Vico uses.
  */
 private fun xDeltaGcd(xValues: List<Double>): Double {
     var gcd: Double? = null
@@ -130,7 +130,7 @@ private fun xDeltaGcd(xValues: List<Double>): Double {
     return gcd ?: 1.0
 }
 
-/** Mirrors Vico's `Double.gcdWith`: a Euclidean GCD rounded to [DOUBLE_GCD_DECIMALS] decimals. */
+/** Mirrors Vico's 'Double.gcdWith': a Euclidean GCD rounded to [DOUBLE_GCD_DECIMALS] decimals. */
 private fun Double.gcdWith(other: Double): Double =
     gcdWithImpl(this, other, threshold = 10.0.pow(-DOUBLE_GCD_DECIMALS - 1))
         .roundToDecimals(DOUBLE_GCD_DECIMALS)
@@ -149,10 +149,10 @@ private fun Double.roundToDecimals(decimals: Int): Double {
 
 /**
  * Shared, multiplatform price chart rendered with Vico (replacing the Android-only MPAndroidChart
- * `LineChart`). It plots the closing price of each [DataPoint] over time as a smoothed, area-filled
+ * 'LineChart'). It plots the closing price of each [DataPoint] over time as a smoothed, area-filled
  * line with a value axis on the trailing edge and a time axis along the bottom.
  *
- * Date/number formatting is platform-specific (the Android app formats with `java.time` and the
+ * Date/number formatting is platform-specific (the Android app formats with 'java.time' and the
  * user's locale/preferences), so the axis and marker label formatters are supplied by the host.
  *
  * @param xAxisFormatter formats a bottom-axis value (an epoch-second timestamp) into a label.
@@ -218,7 +218,7 @@ fun PriceChartView(
                 //
                 // The aligned placer otherwise labels every axis step, and the axis step (the GCD of
                 // the timestamp gaps) is small because of weekend/holiday gaps and the limited
-                // precision of the Float timestamps — so a long range produces hundreds of labels
+                // precision of the Float timestamps - so a long range produces hundreds of labels
                 // that collapse into an unreadable smear. Spacing the labels by xAxisLabelSpacing
                 // caps the visible labels at roughly X_AXIS_LABEL_COUNT so they stay legible.
                 itemPlacer = remember(dataPoints) {
@@ -241,7 +241,7 @@ fun PriceChartView(
         // per-point spacing and scrolls to the latest point, so for long ranges (3M, 1Y, ...) only
         // the most recent handful of points is visible while the Y-axis still fits the whole series.
         // That squeezes the visible line into a thin, flat band. Zoom.Content fits every point to the
-        // chart width so the full range — and its smaller fluctuations — is visible at a glance.
+        // chart width so the full range - and its smaller fluctuations - is visible at a glance.
         zoomState = rememberVicoZoomState(initialZoom = remember { Zoom.Content }),
         modifier = modifier
     )

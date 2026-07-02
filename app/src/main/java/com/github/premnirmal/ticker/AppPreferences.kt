@@ -13,9 +13,9 @@ import java.time.format.FormatStyle.MEDIUM
  * persistence, backed by a [PreferenceStore].
  *
  * The read/write logic itself is fully shared in [SharedUserPreferences]; this class only adds the
- * Android-only extras that depend on JVM types — the `java.text` decimal formatters
- * ([selectedDecimalFormat]) and the saved app-version bookkeeping — plus the legacy preference-key
- * and widget-related constants that the rest of the `:app` module still references.
+ * Android-only extras that depend on JVM types - the 'java.text' decimal formatters
+ * ([selectedDecimalFormat]) and the saved app-version bookkeeping - plus the legacy preference-key
+ * and widget-related constants that the rest of the ':app' module still references.
  *
  * Created by premnirmal on 2/26/16.
  */
@@ -51,7 +51,6 @@ class AppPreferences constructor(
             return builder.toString()
         }
 
-        const val SORTED_STOCK_LIST = "SORTED_STOCK_LIST"
         const val PREFS_NAME = "com.github.premnirmal.ticker"
         const val START_TIME = "START_TIME"
         const val END_TIME = "END_TIME"

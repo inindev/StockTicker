@@ -61,7 +61,6 @@ fun GlanceWidgetPreview(
         modifier = modifier
             .fillMaxWidth()
             .toBackgroundPainter(widgetData)
-            // .paint(painterResource(widgetData.backgroundResource))
             .padding(6.dp)
     ) {
         Column(
@@ -98,7 +97,7 @@ private fun Header(
     onRefreshClick: () -> Unit,
 ) {
     val lastUpdatedText = when (widgetData.fetchState) {
-        is SerializableFetchState.Success -> stringResource(R.string.last_fetch, widgetData.fetchState.displayString)
+        is SerializableFetchState.Success -> stringResource(R.string.updated_at, widgetData.fetchState.displayString)
         is SerializableFetchState.Failure -> stringResource(R.string.refresh_failed)
         else -> SerializableFetchState.NotFetched.displayString
     }
@@ -115,7 +114,8 @@ private fun Header(
             style = TextStyle(
                 color = colorResource(R.color.text_widget_header),
                 fontSize = TextUnit(fontSize, TextUnitType.Sp),
-                textAlign = TextAlign.Start,
+                // Right-justify to match the home screen when there's no refresh button beside it.
+                textAlign = if (widgetData.showRefreshButton) TextAlign.Start else TextAlign.End,
                 fontWeight = FontWeight.Normal,
             ),
         )

@@ -18,19 +18,19 @@ import org.jetbrains.compose.resources.Font
 
 /**
  * Multiplatform Material 3 typography backed by the shared Compose Multiplatform font resources
- * (`shared/src/commonMain/composeResources/font`). Both the Android [AppTheme] and the iOS
- * `IosAppTheme` build their [Typography] from here, so the brand fonts (Ubuntu / Alegreya) render
+ * ('shared/src/commonMain/composeResources/font'). Both the Android [AppTheme] and the iOS
+ * 'IosAppTheme' build their [Typography] from here, so the brand fonts (Ubuntu / Alegreya) render
  * identically on every platform.
  *
- * The font families are exposed as `@Composable` accessors because Compose Multiplatform loads
- * bundled fonts via the `@Composable` [Font] resource API (unlike Android's top-level
- * `Font(R.font.…)`), so they must be resolved inside a composition.
+ * The font families are exposed as '@Composable' accessors because Compose Multiplatform loads
+ * bundled fonts via the '@Composable' [Font] resource API (unlike Android's top-level
+ * 'Font(R.font....)'), so they must be resolved inside a composition.
  *
  * Each [Font] is declared with the weight (and style) that matches the glyphs baked into the
  * underlying TTF. This is important on Android: Compose only reads the weight/style we pass here,
  * not the font's internal metadata, so without it the bold/medium/italic faces are registered as
- * `Normal`/upright. When a heavier [FontWeight] is then requested (e.g. the toolbar title uses
- * `headlineMedium` at [FontWeight.SemiBold]), Compose applies *synthetic* bolding on top of the
+ * 'Normal'/upright. When a heavier [FontWeight] is then requested (e.g. the toolbar title uses
+ * 'headlineMedium' at [FontWeight.SemiBold]), Compose applies *synthetic* bolding on top of the
  * already-bold glyphs, making titles look far too heavy. Declaring the true weight keeps the
  * brand fonts rendering at their natural weight on every platform.
  */

@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 
 /**
  * Unit tests for the [Position]/[Holding] portfolio math (shares, paid price, average price and the
- * supporting `List<Holding>` extension functions) that the holdings UI and widgets rely on.
+ * supporting 'List<Holding>' extension functions) that the holdings UI and widgets rely on.
  */
 class PositionLogicTest {
 

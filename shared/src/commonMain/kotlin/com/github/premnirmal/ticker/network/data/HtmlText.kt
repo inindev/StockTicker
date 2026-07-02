@@ -1,10 +1,10 @@
 package com.github.premnirmal.ticker.network.data
 
 /**
- * Portable, dependency-free "HTML fragment → plain text" conversion used by the non-Android
+ * Portable, dependency-free "HTML fragment -> plain text" conversion used by the non-Android
  * [sanitizeHtml] actuals. It strips tags and decodes the HTML entities that commonly appear in RSS
- * `<title>`/`<description>` values. It is intentionally simple (RSS snippets, not full documents);
- * Android uses the richer `android.text.Html` instead.
+ * '<title>'/'<description>' values. It is intentionally simple (RSS snippets, not full documents);
+ * Android uses the richer 'android.text.Html' instead.
  */
 internal fun stripHtmlToText(html: String): String {
     // Remove tags first, then decode entities so that decoded '<'/'>' are not treated as tags.
@@ -23,7 +23,7 @@ private val NAMED_ENTITIES = mapOf(
 )
 
 /**
- * Decodes named entities from [NAMED_ENTITIES] plus numeric (`&#123;`) and hex (`&#x1F;`) character
+ * Decodes named entities from [NAMED_ENTITIES] plus numeric ('&#123;') and hex ('&#x1F;') character
  * references. Unknown entities are left untouched.
  */
 private fun decodeHtmlEntities(text: String): String {
@@ -51,7 +51,7 @@ private fun codePointToString(codePoint: Int): String =
     }
 
 /**
- * Multiplatform-safe replacement for `StringBuilder.appendCodePoint` (which is JVM-only): appends the
+ * Multiplatform-safe replacement for 'StringBuilder.appendCodePoint' (which is JVM-only): appends the
  * UTF-16 representation of [codePoint], using a surrogate pair for supplementary code points.
  */
 private fun StringBuilder.appendCodePointCompat(codePoint: Int): StringBuilder {

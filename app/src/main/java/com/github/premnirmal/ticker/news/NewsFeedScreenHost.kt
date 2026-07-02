@@ -14,7 +14,7 @@ import org.koin.androidx.compose.koinViewModel
 
 /**
  * Android host for the shared [NewsFeedScreen]. Resolves the Koin [NewsFeedViewModel], the localised
- * labels, the Android `QuoteCard`/`NewsCard` slots, the `RuntimeShader`-based [fadingEdges] and the
+ * labels, the Android 'QuoteCard'/'NewsCard' slots, the 'RuntimeShader'-based [fadingEdges] and the
  * navigation [rememberScrollToTopAction] registration, then delegates to the shared screen.
  */
 @Composable

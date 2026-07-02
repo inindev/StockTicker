@@ -2,10 +2,10 @@ import Foundation
 import BackgroundTasks
 import Shared
 
-/// Platform implementation of the shared `BackgroundTaskScheduler` (the iOS side of the
-/// multiplatform `RefreshScheduler`). It submits `BGTaskScheduler` requests for the background
-/// refresh/cleanup that the shared `BackgroundRefreshScheduler` decides on (it owns the update-window math;
-/// this owns the actual OS submission, the analogue of Android's `AlarmManager`/`WorkManager`).
+/// Platform implementation of the shared 'BackgroundTaskScheduler' (the iOS side of the
+/// multiplatform 'RefreshScheduler'). It submits 'BGTaskScheduler' requests for the background
+/// refresh/cleanup that the shared 'BackgroundRefreshScheduler' decides on (it owns the update-window math;
+/// this owns the actual OS submission, the analogue of Android's 'AlarmManager'/'WorkManager').
 final class StockTickerBackgroundScheduler: BackgroundTaskScheduler {
 
     private let refreshTaskId: String

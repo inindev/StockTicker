@@ -10,14 +10,14 @@ import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
 
 /**
- * Result of the Yahoo Finance initial page load. Mirrors the small slice of `retrofit2.Response`
+ * Result of the Yahoo Finance initial page load. Mirrors the small slice of 'retrofit2.Response'
  * that the caller relied on (HTTP status code, the plain-text HTML body, and the final request URL
- * after redirects) without leaking Retrofit/Ktor types into `:app`, so the existing GDPR
- * cookie-consent logic in `StocksApi` keeps working unchanged.
+ * after redirects) without leaking Retrofit/Ktor types into ':app', so the existing GDPR
+ * cookie-consent logic in 'StocksApi' keeps working unchanged.
  *
  * @param statusCode the HTTP status code of the response.
  * @param html the plain-text HTML body (empty when the request was not successful).
- * @param url the final request URL after redirects, used to derive the consent `sessionId`.
+ * @param url the final request URL after redirects, used to derive the consent 'sessionId'.
  */
 data class YahooInitialLoadResult(
     val statusCode: Int,
@@ -29,7 +29,7 @@ data class YahooInitialLoadResult(
 
 /**
  * Result of a Yahoo Finance cookie-consent submission. Exposes only the HTTP status code so the
- * caller can log failures, mirroring the `retrofit2.Response` slice previously used.
+ * caller can log failures, mirroring the 'retrofit2.Response' slice previously used.
  *
  * @param statusCode the HTTP status code of the response.
  */
@@ -41,21 +41,44 @@ data class YahooCookieConsentResult(
 
 /**
  * Multiplatform client for the Yahoo Finance initial page load and GDPR cookie-consent endpoints.
- * Replaces the Android-only Retrofit `YahooFinanceInitialLoad` interface; the public contract
- * (`initialLoad()` returning the HTML + final URL, and `cookieConsent(...)`) exposes everything the
- * existing `StocksApi.loadCrumb` flow needs without leaking Retrofit/Ktor types into `:app`.
+ * Replaces the Android-only Retrofit 'YahooFinanceInitialLoad' interface; the public contract
+ * ('initialLoad()' returning the HTML + final URL, and 'cookieConsent(...)') exposes everything the
+ * existing 'StocksApi.loadCrumb' flow needs without leaking Retrofit/Ktor types into ':app'.
  *
- * The Yahoo endpoints require the browser `User-Agent`/cookie authentication that lives in the
+ * The Yahoo endpoints require the browser 'User-Agent'/cookie authentication that lives in the
  * Android OkHttp stack, so callers pass an [httpClient] backed by that client (see the Android
- * `createHttpClient(OkHttpClient)` factory).
+ * 'createHttpClient(OkHttpClient)' factory).
  *
- * @param baseUrl the Yahoo Finance initial-load base URL (e.g. `https://finance.yahoo.com/`).
+ * @param baseUrl the Yahoo Finance initial-load base URL (e.g. 'https://finance.yahoo.com/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class YahooFinanceInitialLoadApi(
     private val baseUrl: String,
     private val httpClient: HttpClient = createHttpClient()
 ) {
+
+    private companion object {
+        /**
+         * Cookie-bootstrap URL. Yahoo stopped issuing the 'A1'/'A3' session cookies on
+         * 'finance.yahoo.com', but 'fc.yahoo.com' still sets 'A3' (on domain '.yahoo.com', so it
+         * reaches 'query*.finance.yahoo.com'). The response is a 404 - only its 'Set-Cookie' matters.
+         */
+        const val COOKIE_BOOTSTRAP_URL = "https://fc.yahoo.com/"
+    }
+
+    /**
+     * Harvests the Yahoo session cookies ('A1'/'A3') required by the crumb and quote endpoints.
+     *
+     * Yahoo no longer sets these on 'finance.yahoo.com', so relying on [initialLoad] alone leaves the
+     * client cookie-less: 'getCrumb' then returns "Invalid Cookie" and every quote 401s. Fetching
+     * [COOKIE_BOOTSTRAP_URL] first (it 404s, which is expected and ignored) lets the client's cookie
+     * jar capture the 'Set-Cookie' so the subsequent crumb/quote calls are authenticated. This is the
+     * same technique used by common Yahoo Finance clients.
+     */
+    suspend fun bootstrapCookies() {
+        // A 404 (or any failure) is expected and irrelevant - only the Set-Cookie side effect matters.
+        runCatching { httpClient.get(COOKIE_BOOTSTRAP_URL) }
+    }
 
     /**
      * Loads the Yahoo Finance landing page, following the GDPR consent redirect when one is served.

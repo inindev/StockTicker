@@ -20,7 +20,7 @@ val LocalNavGraphViewModelStoreOwner = staticCompositionLocalOf<ViewModelStoreOw
 
 /**
  * Registers a scroll-to-top action for the given [route] against the shared [NavigationViewModel]
- * and returns a [State] that flips to `true` while the [scrollToTop] action runs.
+ * and returns a [State] that flips to 'true' while the [scrollToTop] action runs.
  */
 @Composable
 fun rememberScrollToTopAction(

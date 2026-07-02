@@ -1,11 +1,9 @@
 package com.github.premnirmal.ticker.settings
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.net.Uri
 import com.github.premnirmal.ticker.model.StocksProvider
 import com.github.premnirmal.ticker.network.data.Quote
-import com.github.premnirmal.ticker.widget.WidgetDataProvider
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -18,8 +16,9 @@ internal interface ImportTask {
     suspend fun import(context: Context, fileUri: Uri): Boolean
 }
 
-internal open class TickersImportTask(private val widgetDataProvider: WidgetDataProvider) :
-    ImportTask, KoinComponent {
+internal open class TickersImportTask(
+    private val stocksProvider: StocksProvider,
+) : ImportTask, KoinComponent {
 
     private val portfolioSerializer: PortfolioSerializer by inject()
 
@@ -31,18 +30,10 @@ internal open class TickersImportTask(private val widgetDataProvider: WidgetData
                 ?.use { inputStream ->
                     BufferedReader(InputStreamReader(inputStream)).use { reader ->
                         val text: String = reader.readText()
-                        val tickers = portfolioSerializer.parseTickers(text).toTypedArray()
-                        if (widgetDataProvider.hasWidget()) {
-                            widgetDataProvider.getAppWidgetIds()
-                                .forEach { widgetId ->
-                                    val widgetData = widgetDataProvider.dataForWidgetId(widgetId)
-                                    widgetData.addTickers(listOf(*tickers))
-                                }
-                        } else {
-                            val widgetData =
-                                widgetDataProvider.dataForWidgetId(AppWidgetManager.INVALID_APPWIDGET_ID)
-                            widgetData.addTickers(listOf(*tickers))
-                        }
+                        val tickers = portfolioSerializer.parseTickers(text)
+                        // addStocks tracks the symbols and persists them to the All Symbols master
+                        // list (the durable source of truth for the fetch set).
+                        stocksProvider.addStocks(tickers)
                         result = true
                     }
                 }
@@ -55,8 +46,9 @@ internal open class TickersImportTask(private val widgetDataProvider: WidgetData
     }
 }
 
-internal open class PortfolioImportTask(private val stocksProvider: StocksProvider) :
-    ImportTask, KoinComponent {
+internal open class PortfolioImportTask(
+    private val stocksProvider: StocksProvider,
+) : ImportTask, KoinComponent {
 
     private val portfolioSerializer: PortfolioSerializer by inject()
 
@@ -67,6 +59,7 @@ internal open class PortfolioImportTask(private val stocksProvider: StocksProvid
                 BufferedReader(InputStreamReader(inputStream)).use { reader ->
                     val jsonText: String = reader.readText()
                     val portfolio: List<Quote> = portfolioSerializer.deserializePortfolio(jsonText)
+                    // addPortfolio tracks the symbols and persists them to All Symbols.
                     stocksProvider.addPortfolio(portfolio)
                     true
                 }

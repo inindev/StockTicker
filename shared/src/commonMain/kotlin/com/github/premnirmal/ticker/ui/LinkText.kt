@@ -23,8 +23,8 @@ data class LinkTextData(
 /**
  * Shared (Compose Multiplatform) inline rich text that renders tappable links. The actual link
  * action is hoisted as [onLinkClick] (the tapped run's [LinkTextData.annotation]) because opening a
- * URL is platform specific — Android uses Chrome Custom Tabs, iOS its in-app browser — mirroring the
- * way the shared `NewsCard` hoists its tap handler.
+ * URL is platform specific - Android uses Chrome Custom Tabs, iOS its in-app browser - mirroring the
+ * way the shared 'NewsCard' hoists its tap handler.
  */
 @Composable
 fun LinkText(

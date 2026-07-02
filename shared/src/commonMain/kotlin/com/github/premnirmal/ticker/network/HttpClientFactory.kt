@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Lenient JSON configuration shared across the multiplatform networking layer. Mirrors the
- * settings previously used by the Android-only Retrofit/`NetworkModule` setup.
+ * settings previously used by the Android-only Retrofit/'NetworkModule' setup.
  */
 internal val ApiJson: Json = Json {
     ignoreUnknownKeys = true
@@ -41,13 +41,13 @@ fun createHttpClient(): HttpClient = HttpClient {
 
 /**
  * Creates a Ktor [HttpClient] configured with the shared lenient JSON content negotiation **and**
- * the shared Yahoo Finance authentication ([installYahooAuth]: browser `User-Agent`/`Accept`
+ * the shared Yahoo Finance authentication ([installYahooAuth]: browser 'User-Agent'/'Accept'
  * headers, crumb query parameter and an in-memory cookie store).
  *
- * This is `expect`/`actual` (rather than a single classpath-engine builder) so each platform can
+ * This is 'expect'/'actual' (rather than a single classpath-engine builder) so each platform can
  * pin and configure its engine. iOS in particular needs to disable the Darwin engine's native
- * `NSURLSession` cookie handling so Ktor's [io.ktor.client.plugins.cookies.HttpCookies] plugin is
- * the single cookie authority — otherwise the shared `NSHTTPCookieStorage` competes with Ktor's
+ * 'NSURLSession' cookie handling so Ktor's [io.ktor.client.plugins.cookies.HttpCookies] plugin is
+ * the single cookie authority - otherwise the shared 'NSHTTPCookieStorage' competes with Ktor's
  * in-memory store and the Yahoo crumb/consent cookies are not sent consistently, which leaves
  * trending stocks empty on the first cold fetch. See the iOS actual for details.
  *
@@ -58,9 +58,9 @@ expect fun createYahooHttpClient(crumbProvider: CrumbProvider): HttpClient
 /**
  * Yahoo Finance authentication binds the crumb token to the session cookies issued during the
  * cookie-consent flow, so every Yahoo endpoint (initial load, crumb, quotes, suggestions, charts,
- * news, most-active) must share a **single** [HttpClient] — and therefore a single in-memory cookie
- * store. The Android app achieves this by reusing one `@Named("yahoo")` OkHttp client across all
- * APIs; these `(baseUrl, httpClient)` overloads let the iOS Koin module do the same with one shared
+ * news, most-active) must share a **single** [HttpClient] - and therefore a single in-memory cookie
+ * store. The Android app achieves this by reusing one @Named("yahoo") OkHttp client across all
+ * APIs; these '(baseUrl, httpClient)' overloads let the iOS Koin module do the same with one shared
  * [createYahooHttpClient] instance. Building a separate client per API instead would give each its
  * own cookie jar, so the consent cookies obtained while fetching the crumb would never accompany the
  * quote requests, which then fail with HTTP 401.
@@ -94,7 +94,7 @@ fun createYahooFinanceNewsApi(baseUrl: String, httpClient: HttpClient): YahooFin
 
 /**
  * Builds a [SuggestionApi] authenticated for Yahoo Finance via the shared, engine-agnostic
- * [createYahooHttpClient]. Unlike the Android `createSuggestionApi(baseUrl, okHttpClient)` factory,
+ * [createYahooHttpClient]. Unlike the Android 'createSuggestionApi(baseUrl, okHttpClient)' factory,
  * this overload works on any platform (notably iOS) because it does not require a preconfigured
  * OkHttp client.
  */

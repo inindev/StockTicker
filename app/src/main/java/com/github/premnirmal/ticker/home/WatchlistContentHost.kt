@@ -4,7 +4,9 @@ import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -15,16 +17,15 @@ import com.github.premnirmal.ticker.navigation.HomeRoute
 import com.github.premnirmal.ticker.navigation.rememberScrollToTopAction
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.ticker.ui.fadingEdges
-import com.github.premnirmal.ticker.widget.WidgetData
 import com.github.premnirmal.tickerwidget.R
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Android host for the shared [com.github.premnirmal.ticker.home.WatchlistContent]. Collects the
- * [HomeViewModel] flows, adapts the Android `WidgetData` to the shared [WatchlistWidget] abstraction,
- * resolves the localised strings, the `ic_money` icon, the theme-aware header background, the Android
- * `QuoteCard`/`TotalHoldingsPopup` slots, the `RuntimeShader`-based [fadingEdges] and the navigation
- * [rememberScrollToTopAction] registrations, then delegates to the shared screen.
+ * [HomeViewModel] flows (watchlists are sourced from [com.github.premnirmal.ticker.repo.WatchlistRepository]
+ * as [WatchlistWidget]s), resolves the localised strings, the 'ic_money' icon, the theme-aware header
+ * background, the Android 'QuoteCard'/'TotalHoldingsPopup' slots, the 'RuntimeShader'-based
+ * [fadingEdges] and the navigation [rememberScrollToTopAction] registrations, then delegates to the
+ * shared screen.
  */
 @Composable
 fun WatchlistContent(
@@ -39,13 +40,17 @@ fun WatchlistContent(
     val updatedTime = (fetchState as? FetchState.Success)?.let {
         stringResource(R.string.updated_at, it.updatedString)
     }.orEmpty()
-    val watchlistWidgets = remember(widgets) { widgets.map { WidgetDataWatchlistWidget(it) } }
+    val manageableWatchlists by viewModel.manageableWatchlists.collectAsState(emptyList())
+    var showManage by remember { mutableStateOf(false) }
+    var showNewWatchlist by remember { mutableStateOf(false) }
     WatchlistContent(
         updatedTime = updatedTime,
         hasHoldings = viewModel.hasHoldings,
         isRefreshing = isRefreshing,
-        widgets = watchlistWidgets,
+        widgets = widgets,
         dropdownArrow = painterResource(R.drawable.ic_arrow_down),
+        onManageWatchlists = { showManage = true },
+        onNewWatchlist = { showNewWatchlist = true },
         totalGainLoss = totalHoldings,
         totalHoldingsIcon = painterResource(R.drawable.ic_money),
         onRefresh = viewModel::refresh,
@@ -75,22 +80,20 @@ fun WatchlistContent(
             rememberScrollToTopAction(HomeRoute.Watchlist, index, scrollToTop = scroll)
         },
     )
-}
 
-/**
- * Adapts the Android [WidgetData] to the shared [WatchlistWidget] contract used by the shared
- * watchlist screen.
- */
-private class WidgetDataWatchlistWidget(
-    private val widgetData: WidgetData,
-) : WatchlistWidget {
-    override val name: String
-        get() = widgetData.widgetName()
-    override val stocks: StateFlow<List<Quote>>
-        get() = widgetData.stocks
-    override fun rearrange(tickers: List<String>) = widgetData.rearrange(tickers)
-    override fun setAutoSort(autoSort: Boolean) = widgetData.setAutoSort(autoSort)
-    override fun removeStock(ticker: String) {
-        widgetData.removeStock(ticker)
+    if (showManage) {
+        ManageWatchlistsDialogContent(
+            watchlists = manageableWatchlists,
+            onCreate = viewModel::createWatchlist,
+            onRename = viewModel::renameWatchlist,
+            onDelete = viewModel::deleteWatchlist,
+            onDismissRequest = { showManage = false },
+        )
+    }
+    if (showNewWatchlist) {
+        NewWatchlistPrompt(
+            onCreate = viewModel::createWatchlist,
+            onDismissRequest = { showNewWatchlist = false },
+        )
     }
 }

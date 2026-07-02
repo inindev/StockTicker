@@ -4,14 +4,19 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Platform-agnostic view of a single widget's editable settings, rendered by the shared
- * [WidgetsScreen]. The Android `WidgetData` (backed by Glance/`SharedPreferences`) is adapted to this
- * interface by the `:app` host so the shared screen does not depend on the Android widget model.
+ * [WidgetsScreen]. The Android 'WidgetData' (backed by Glance/'SharedPreferences') is adapted to this
+ * interface by the ':app' host so the shared screen does not depend on the Android widget model.
  */
 interface WidgetSettings {
     /** Reactive snapshot of the preference values rendered by the screen. */
     val prefs: StateFlow<WidgetPrefs>
 
-    fun setWidgetName(value: String)
+    /** The watchlists this widget can display, in the order shown by the "Watchlist" dropdown. */
+    val watchlistOptions: List<WatchlistOption>
+
+    /** Points the widget at watchlist [value]. A widget is a view onto a watchlist, not an independent symbol list. */
+    fun setWatchlistId(value: Long)
+
     fun setAutoSort(value: Boolean)
     fun setLayoutPref(value: Int)
 
@@ -28,11 +33,18 @@ interface WidgetSettings {
 
 /**
  * The subset of widget preference values rendered by [WidgetsScreen]. The Android-only fields
- * (`@DrawableRes`/`@ColorRes` resources used to actually paint the widget) stay on the Android
- * `WidgetData.Prefs` and are not exposed here.
+ * ('@DrawableRes'/'@ColorRes' resources used to actually paint the widget) stay on the Android
+ * 'WidgetData.Prefs' and are not exposed here.
  */
+/** A watchlist a widget can be pointed at, shown in the "Watchlist" dropdown. */
+data class WatchlistOption(
+    val id: Long,
+    val name: String,
+)
+
 data class WidgetPrefs(
     val name: String,
+    val watchlistId: Long,
     val autoSort: Boolean,
     val typePref: Int,
     @Deprecated("will be removed in future version")
@@ -48,13 +60,11 @@ data class WidgetPrefs(
 
 /**
  * The localised labels and string-array options rendered by [WidgetsScreen]. They are resolved by
- * the `:app` host (via `stringResource`/`stringArrayResource`) and passed in so the shared screen has
+ * the ':app' host (via 'stringResource'/'stringArrayResource') and passed in so the shared screen has
  * no Android resource dependency.
  */
 class WidgetSettingsStrings(
-    val widgetName: String,
-    val addStock: String,
-    val trendingStocks: String,
+    val watchlist: String,
     val autoSort: String,
     val autoSortDesc: String,
     val layoutType: String,

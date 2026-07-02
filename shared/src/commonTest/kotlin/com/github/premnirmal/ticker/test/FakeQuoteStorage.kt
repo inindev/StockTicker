@@ -7,7 +7,7 @@ import com.github.premnirmal.ticker.repo.QuoteStorage
 
 /**
  * In-memory [QuoteStorage] used by the shared ViewModel tests. It records the saved properties,
- * holdings and tickers so tests can assert on persistence side effects without a real database.
+ * holdings and quotes so tests can assert on persistence side effects without a real database.
  */
 class FakeQuoteStorage : QuoteStorage {
 
@@ -15,15 +15,8 @@ class FakeQuoteStorage : QuoteStorage {
     val savedQuotes: MutableList<Quote> = mutableListOf()
     val addedHoldings: MutableList<Holding> = mutableListOf()
     val removedHoldings: MutableList<Pair<String, Holding>> = mutableListOf()
-    var tickers: MutableSet<String> = mutableSetOf()
 
     private var nextHoldingId = 1L
-
-    override fun saveTickers(tickers: Set<String>) {
-        this.tickers = tickers.toMutableSet()
-    }
-
-    override fun readTickers(): Set<String> = tickers
 
     override suspend fun readQuotes(): List<Quote> = savedQuotes.toList()
 

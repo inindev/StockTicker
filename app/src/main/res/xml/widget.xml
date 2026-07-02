@@ -8,4 +8,5 @@
     android:previewImage="@drawable/widget_preview"
     android:previewLayout="@layout/glance_preview_layout"
     android:resizeMode="horizontal|vertical"
+    android:widgetFeatures="reconfigurable"
     android:widgetCategory="home_screen" />

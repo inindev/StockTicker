@@ -7,9 +7,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 
 /**
- * Installs an [UnconfinedTestDispatcher] as `Dispatchers.Main` so that `viewModelScope.launch`
- * blocks in the shared ViewModels run eagerly during a test. Call [set] in `@BeforeTest` and
- * [reset] in `@AfterTest`.
+ * Installs an [UnconfinedTestDispatcher] as 'Dispatchers.Main' so that 'viewModelScope.launch'
+ * blocks in the shared ViewModels run eagerly during a test. Call [set] in '@BeforeTest' and
+ * [reset] in '@AfterTest'.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 object MainDispatcherRule {

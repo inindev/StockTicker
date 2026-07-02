@@ -59,7 +59,13 @@ import com.github.premnirmal.ticker.portfolio.DisplaynameViewModel
 import com.github.premnirmal.ticker.portfolio.NotesScreen
 import com.github.premnirmal.ticker.portfolio.NotesViewModel
 import com.github.premnirmal.ticker.portfolio.localeDecimalSeparator
+import com.github.premnirmal.ticker.portfolio.search.AddSymbolDialogContent
+import com.github.premnirmal.ticker.portfolio.search.CreateWatchlistError
+import com.github.premnirmal.ticker.portfolio.search.SuggestionState
+import com.github.premnirmal.ticker.portfolio.search.SuggestionWidgetDataState
 import com.github.premnirmal.ticker.repo.StocksStorage
+import com.github.premnirmal.ticker.repo.WatchlistRepository
+import com.github.premnirmal.ticker.repo.data.Watchlist
 import com.github.premnirmal.tickerwidget.ui.AppCard
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -78,6 +84,7 @@ private object QuoteDetailKoin : KoinComponent {
     val historyProvider: HistoryProvider by inject()
     val userPreferences: UserPreferences by inject()
     val stocksStorage: StocksStorage by inject()
+    val watchlistRepository: WatchlistRepository by inject()
 }
 
 private val PositiveColor = Color(0xFF66BB6A)
@@ -87,24 +94,24 @@ private val NegativeColor = Color(0xFFEF5350)
 private enum class ActiveEditor { NONE, POSITIONS, ALERTS, NOTES, DISPLAYNAME }
 
 /**
- * iOS quote-detail host. It is the iOS counterpart of the `:app`
- * `QuoteDetailScreenHost`: it drives the shared [QuoteDetailViewModel] (resolved from the iOS Koin
+ * iOS quote-detail host. It is the iOS counterpart of the ':app'
+ * 'QuoteDetailScreenHost': it drives the shared [QuoteDetailViewModel] (resolved from the iOS Koin
  * graph) and delegates all rendering to the cross-platform
  * [com.github.premnirmal.ticker.detail.QuoteDetailScreen]. The Android-specific inputs the shared
  * screen hoists are supplied here for iOS:
  *  - the localised labels as a [QuoteDetailStrings] holder and the quote-detail value rows
  *    ([buildQuoteDetails] -> [QuoteDetailItem]) derived from the fetched [Quote]/[QuoteSummary],
- *  - the refresh/add/edit icons as `Res.drawable` [painterResource]s and the platform chart
+ *  - the refresh/add/edit icons as 'Res.drawable' [painterResource]s and the platform chart
  *    date/number formatters,
- *  - the shared `AppCard`/`NewsCard` slots, an in-app website link and an add/remove-watchlist
+ *  - the shared 'AppCard'/'NewsCard' slots, an in-app website link and an add/remove-watchlist
  *    confirmation dialog (iOS has a single watchlist, unlike Android's per-widget add),
  *  - the positions / price-alerts / notes / display-name editors, presented full-screen via the
  *    [ActiveEditor] state and persisted through the shared [AddPositionViewModel]/[AlertsViewModel]/
- *    [NotesViewModel]/[DisplaynameViewModel], wired to the shared screen's `onEdit*` callbacks,
+ *    [NotesViewModel]/[DisplaynameViewModel], wired to the shared screen's 'onEdit*' callbacks,
  *  - a top-bar back button ([navigationIcon]). On a wide window (iPad / Split View) the shared
  *    screen's adaptive two-column [twoPane] layout is supplied; on a compact window it falls back to
  *    a single column. The pane mode can be forced via [contentType] (the home list/detail pane passes
- *    `SINGLE_PANE` so the detail column itself stays single-column).
+ *    'SINGLE_PANE' so the detail column itself stays single-column).
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -203,7 +210,7 @@ fun QuoteDetailScreen(
 /**
  * Collects the remaining [QuoteDetailViewModel] state and renders the shared
  * [com.github.premnirmal.ticker.detail.QuoteDetailScreen] with the iOS slots/formatters. Shows a
- * loading scaffold (mirroring the Android `QuoteDetailActivity`) until the quote is available.
+ * loading scaffold (mirroring the Android 'QuoteDetailActivity') until the quote is available.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -344,11 +351,10 @@ private fun QuoteDetailContent(
         newsCard = { article -> NewsCard(item = article, onClick = { openUrl(article.url) }) },
         navigationIcon = backButton,
         addSymbolDialog = { dialogSymbol, onDismissRequest ->
-            AddRemovePortfolioDialog(
+            AddToWatchlistDialog(
                 symbol = dialogSymbol,
-                isInPortfolio = isInPortfolio,
                 onDismissRequest = onDismissRequest,
-                onToggle = {
+                onChanged = {
                     onPortfolioChanged()
                     viewModel.fetchQuote(symbol)
                 }
@@ -368,48 +374,87 @@ private fun QuoteDetailContent(
 }
 
 /**
- * iOS add/remove confirmation dialog backing the shared screen's add/remove FAB. Unlike Android —
- * where a symbol is added to a specific Glance widget — iOS has a single watchlist, so the action
- * toggles the symbol's membership of the shared portfolio directly.
+ * iOS host for the shared multi-watchlist [AddSymbolDialogContent] - the same "Add to Watchlist"
+ * checkbox dialog Android shows from the quote-detail add button (matching the Apple reference). It
+ * lists every watchlist with a leading checkbox (checked = the symbol is in that list) and offers a
+ * "New Watchlist" action. Unlike a simple add/remove toggle, this lets the user place a symbol in
+ * multiple watchlists at once.
+ *
+ * The iOS 'SuggestionViewModel' machinery lives in ':app', so this drives the shared dialog directly
+ * from [WatchlistRepository] (mirroring that view-model's logic): the reactive [watchlistsFlow]
+ * builds the [SuggestionState]; membership writes go through the repository (the fetch set derives
+ * from All Symbols), with an optimistic [IStocksProvider] nudge for immediacy.
  */
 @Composable
-private fun AddRemovePortfolioDialog(
+private fun AddToWatchlistDialog(
     symbol: String,
-    isInPortfolio: Boolean,
     onDismissRequest: () -> Unit,
-    onToggle: () -> Unit
+    onChanged: () -> Unit,
 ) {
+    val repository = QuoteDetailKoin.watchlistRepository
+    val stocksProvider = QuoteDetailKoin.stocksProvider
     val scope = rememberCoroutineScope()
-    AlertDialog(
+
+    // Latest watchlist snapshot: drives the checkbox list and backs synchronous duplicate-name
+    // validation in the "New Watchlist" flow.
+    var watchlists by remember { mutableStateOf<List<Watchlist>>(emptyList()) }
+    LaunchedEffect(symbol) {
+        repository.watchlistsFlow().collect { watchlists = it }
+    }
+
+    val suggestionState = remember(symbol, watchlists) {
+        SuggestionState(
+            symbol = symbol,
+            widgetDataList = watchlists.map { watchlist ->
+                SuggestionWidgetDataState(
+                    symbol = symbol,
+                    watchlistName = watchlist.name,
+                    watchlistId = watchlist.id,
+                    exists = watchlist.symbols.contains(symbol),
+                )
+            },
+        )
+    }
+
+    // Don't render an empty dialog before the first watchlists emission arrives.
+    if (watchlists.isEmpty()) return
+
+    AddSymbolDialogContent(
+        suggestionState = suggestionState,
         onDismissRequest = onDismissRequest,
-        title = { Text(symbol) },
-        text = {
-            Text(
-                if (isInPortfolio) {
-                    "Remove $symbol from your watchlist?"
-                } else {
-                    "Add $symbol to your watchlist?"
+        onRemoved = { state ->
+            scope.launch {
+                repository.removeSymbol(state.watchlistId, symbol)
+                if (state.watchlistName == WatchlistRepository.ALL_SYMBOLS_NAME) {
+                    stocksProvider.removeStock(symbol)
                 }
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                scope.launch {
-                    if (isInPortfolio) {
-                        QuoteDetailKoin.stocksProvider.removeStock(symbol)
-                    } else {
-                        QuoteDetailKoin.stocksProvider.addStock(symbol)
-                    }
-                    onToggle()
-                }
-                onDismissRequest()
-            }) {
-                Text(if (isInPortfolio) "Remove" else "Add")
+                onChanged()
             }
         },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) { Text("Cancel") }
-        }
+        onAdded = { state ->
+            scope.launch {
+                repository.addSymbol(state.watchlistId, symbol)
+                stocksProvider.addStock(symbol)
+                onChanged()
+            }
+        },
+        onCreateWatchlist = { name ->
+            val trimmed = name.trim()
+            when {
+                trimmed.isEmpty() -> CreateWatchlistError.BLANK
+                watchlists.any { it.name.equals(trimmed, ignoreCase = true) } ->
+                    CreateWatchlistError.DUPLICATE
+                else -> {
+                    scope.launch {
+                        val newId = repository.createWatchlist(trimmed)
+                        repository.addSymbol(newId, symbol)
+                        stocksProvider.addStock(symbol)
+                        onChanged()
+                    }
+                    null
+                }
+            }
+        },
     )
 }
 
@@ -442,7 +487,7 @@ private val iosQuoteDetailStrings = QuoteDetailStrings(
 
 /**
  * Builds the list of quote-detail value rows (title to formatted value) shown in the grid below the
- * chart, mirroring the Android `buildQuoteDetails`. Epoch timestamps are interpreted as milliseconds
+ * chart, mirroring the Android 'buildQuoteDetails'. Epoch timestamps are interpreted as milliseconds
  * to match the Android formatting.
  */
 private fun buildQuoteDetails(quote: Quote, quoteSummary: QuoteSummary?): List<QuoteDetailItem> {
@@ -477,16 +522,16 @@ private fun buildQuoteDetails(quote: Quote, quoteSummary: QuoteSummary?): List<Q
     return details
 }
 
-/** Formats a float with two fraction digits, mirroring Android's `Float.format()`. */
+/** Formats a float with two fraction digits, mirroring Android's 'Float.format()'. */
 private fun formatDecimal(value: Float): String = AppNumberFormat.TWO_DP.format(value)
 
-/** Formats a long with grouping separators, mirroring Android's `Long.format()`. */
+/** Formats a long with grouping separators, mirroring Android's 'Long.format()'. */
 private fun formatGrouped(value: Long): String {
     val formatter = NSNumberFormatter().apply { numberStyle = NSNumberFormatterDecimalStyle }
     return formatter.stringFromNumber(NSNumber(long = value)) ?: value.toString()
 }
 
-/** Abbreviates large numbers as K/M/B/T, mirroring Android's `Long.formatBigNumbers`. */
+/** Abbreviates large numbers as K/M/B/T, mirroring Android's 'Long.formatBigNumbers'. */
 private fun formatBigNumber(value: Long): String = when {
     value < 100_000 -> formatGrouped(value)
     value < 1_000_000 -> formatAbbreviated(value / 1_000.0, "K")
@@ -505,7 +550,7 @@ private fun formatAbbreviated(value: Double, suffix: String): String {
     return "$number$suffix"
 }
 
-/** Formats an epoch-millis timestamp as a long date, mirroring Android's `date_format_long`. */
+/** Formats an epoch-millis timestamp as a long date, mirroring Android's 'date_format_long'. */
 private fun formatEpochDate(epochMillis: Long): String {
     val formatter = NSDateFormatter().apply { dateFormat = "MMM dd, yyyy" }
     return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(epochMillis.toDouble() / 1000.0))
@@ -643,7 +688,7 @@ private fun DisplaynameEditor(
 
 /**
  * Parses a cleaned decimal string (which uses the locale decimal separator) to a [Float], returning
- * `null` when the text is not a valid number. Mirrors the Android holdings/alerts parsing.
+ * 'null' when the text is not a valid number. Mirrors the Android holdings/alerts parsing.
  */
 private fun parseDecimal(text: String): Float? =
     text.replace(localeDecimalSeparator(), '.').toFloatOrNull()

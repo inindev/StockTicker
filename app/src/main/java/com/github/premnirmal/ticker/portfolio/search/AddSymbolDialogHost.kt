@@ -11,7 +11,7 @@ import org.koin.core.parameter.parametersOf
 
 /**
  * Thin Android host for the shared [AddSymbolDialogContent]. Resolves the Koin
- * `SuggestionViewModel` and forwards its state and add/remove events to the shared dialog.
+ * 'SuggestionViewModel' and forwards its state and add/remove events to the shared dialog.
  */
 @Composable
 fun AddSymbolDialog(
@@ -24,10 +24,13 @@ fun AddSymbolDialog(
         suggestionState = suggestionState,
         onDismissRequest = onDismissRequest,
         onRemoved = { suggestionWidgetData ->
-            viewModel.removeFromWidget(suggestionWidgetData)
+            viewModel.removeFromWatchlist(suggestionWidgetData)
         },
         onAdded = { suggestionWidgetData ->
-            viewModel.addToWidget(suggestionWidgetData)
+            viewModel.addToWatchlist(suggestionWidgetData)
+        },
+        onCreateWatchlist = { name ->
+            viewModel.createWatchlist(name)
         },
     )
 }
@@ -42,14 +45,14 @@ fun AddSymbolScreenPreview() {
                 widgetDataList = listOf(
                     SuggestionWidgetDataState(
                         "AAPL",
-                        "Watchlist",
-                        1,
+                        "All Symbols",
+                        1L,
                         true
                     ),
                     SuggestionWidgetDataState(
                         "AAPL",
-                        "Watchlist 2",
-                        2,
+                        "Tech",
+                        2L,
                         false
                     ),
                 )
@@ -57,6 +60,7 @@ fun AddSymbolScreenPreview() {
             onAdded = { _ -> },
             onRemoved = { _ -> },
             onDismissRequest = {},
+            onCreateWatchlist = { null },
         )
     }
 }

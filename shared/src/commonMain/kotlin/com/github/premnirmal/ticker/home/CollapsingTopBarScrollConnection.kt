@@ -18,7 +18,7 @@ class CollapsingTopBarScrollConnection(
         private set
 
     /**
-     * Whether the header is allowed to collapse. Set to `false` when the scrolling content fits
+     * Whether the header is allowed to collapse. Set to 'false' when the scrolling content fits
      * within the viewport (nothing to scroll), so the header stays fully expanded instead of
      * collapsing on a drag that the inner list can't consume. Expanding an already-collapsed header
      * back open is always allowed.

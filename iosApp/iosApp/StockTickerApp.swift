@@ -7,16 +7,15 @@ import FirebaseCore
 
 /// Entry point for the thin iOS shell.
 ///
-/// Phase 2 deliverable: this wires the Kotlin Multiplatform `:shared` framework's iOS
-/// implementations into the live app — it starts Koin with the shared + iOS modules, supplies the
-/// platform `BGTaskScheduler` background-refresh bridge (`StockTickerBackgroundScheduler`), the
-/// analytics sink (`StockTickerAnalyticsSink`) and the WidgetKit timeline-reload hook. The full
-/// SwiftUI / Compose-Multiplatform UI is a later phase; for now the shell verifies the shared
-/// provider/scheduler are functional.
+/// Wires the Kotlin Multiplatform ':shared' framework's iOS implementations into the live app - it
+/// starts Koin with the shared + iOS modules, supplies the platform 'BGTaskScheduler'
+/// background-refresh bridge ('StockTickerBackgroundScheduler'), the analytics sink
+/// ('StockTickerAnalyticsSink'), and the WidgetKit timeline-reload hook. The SwiftUI shell hosts
+/// the shared Compose Multiplatform UI via 'ContentView'.
 @main
 struct StockTickerApp: App {
 
-    /// Identifiers must also be listed under `BGTaskSchedulerPermittedIdentifiers` in Info.plist.
+    /// Identifiers must also be listed under 'BGTaskSchedulerPermittedIdentifiers' in Info.plist.
     static let refreshTaskId = "com.github.premnirmal.StockTicker.refresh"
     static let cleanupTaskId = "com.github.premnirmal.StockTicker.cleanup"
 
@@ -42,7 +41,7 @@ struct StockTickerApp: App {
             onQuotesUpdated: {
                 // A successful network refresh: rewrite the snapshot (so its timestamp/prices are
                 // current) and reload, writing before reloading so the widget never reads a stale
-                // snapshot. Local watchlist edits are additionally covered by `WidgetSnapshotSync`.
+                // snapshot. Local watchlist edits are additionally covered by 'WidgetSnapshotSync'.
                 KoinHelper.shared.writeWidgetSnapshot()
                 WidgetCenterReloader.reloadAll()
             }
@@ -65,9 +64,9 @@ struct StockTickerApp: App {
         }
     }
 
-    /// Configures the Firebase iOS SDK when it is linked and a `GoogleService-Info.plist` is present
-    /// (the prod build). For the FOSS build — no Firebase SDK / no config — this is a no-op and the
-    /// `StockTickerAnalyticsSink` falls back to `NSLog`, mirroring the Android purefoss/dev flavours.
+    /// Configures the Firebase iOS SDK when it is linked and a 'GoogleService-Info.plist' is present
+    /// (the prod build). For the FOSS build - no Firebase SDK / no config - this is a no-op and the
+    /// 'StockTickerAnalyticsSink' falls back to 'NSLog', mirroring the Android purefoss/dev flavours.
     private func configureFirebase() {
         #if canImport(FirebaseCore)
         guard Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil else {

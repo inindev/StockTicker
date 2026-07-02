@@ -1,15 +1,15 @@
 package com.github.premnirmal.ticker.settings
 
 /**
- * Platform-neutral, synchronous key/value store — the multiplatform abstraction that backs the
- * shared settings/persistence layer ([com.github.premnirmal.ticker.UserPreferences],
- * [com.github.premnirmal.ticker.repo.TickersStore], the iOS `StocksProvider`).
+ * Platform-neutral, synchronous key/value store - the multiplatform abstraction that backs the
+ * shared settings/persistence layer ([com.github.premnirmal.ticker.UserPreferences] and the widget
+ * display prefs).
  *
- * It is the common contract that both the legacy native stores (iOS `NSUserDefaults` via
- * `SettingsStore`, Android `SharedPreferences`) and the unified **DataStore Multiplatform**
+ * It is the common contract that both the legacy native stores (iOS 'NSUserDefaults' via
+ * 'SettingsStore', Android 'SharedPreferences') and the unified **DataStore Multiplatform**
  * implementation ([DataStorePreferenceStore]) conform to, so the concrete key/value engine can be
  * swapped without touching the consumers. The accessors are intentionally synchronous to match the
- * existing `SharedPreferences`/`NSUserDefaults` semantics the settings code is written against.
+ * existing 'SharedPreferences'/'NSUserDefaults' semantics the settings code is written against.
  */
 interface PreferenceStore {
 

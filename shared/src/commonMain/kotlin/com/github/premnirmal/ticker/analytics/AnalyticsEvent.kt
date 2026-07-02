@@ -2,13 +2,9 @@ package com.github.premnirmal.ticker.analytics
 
 /**
  * Platform-neutral analytics event model: an event [name] plus an accumulating map of string
- * [properties].
- *
- * This is the shared "analytics event" of the multiplatform DI/platform-infra story: it mirrors the
- * other Phase 2 splits — the platform-neutral value types live in `commonMain`, alongside the shared
- * [Analytics] contract and [GeneralProperties]. The platform sink stays platform specific: Android's
- * per-flavor `AnalyticsImpl` reports these events through Firebase (prod) or no-ops (purefoss/dev),
- * and iOS forwards them to an `AnalyticsSink` (Firebase when linked, else `NSLog`).
+ * [properties]. Lives in 'commonMain' alongside the shared [Analytics] contract and
+ * [GeneralProperties]; each platform supplies a sink (Firebase on Android prod, 'AnalyticsSink' on
+ * iOS, no-ops elsewhere).
  */
 sealed class AnalyticsEvent(val name: String) {
 

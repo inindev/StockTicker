@@ -7,12 +7,12 @@ import kotlin.time.Instant
  * Multiplatform clock abstraction shared by Android and iOS.
  *
  * [now] is backed by the Kotlin stdlib multiplatform time API ([kotlin.time.Clock]), replacing
- * the previous Android-only `System.currentTimeMillis()` / `java.time` access. [elapsedRealtime]
+ * the previous Android-only 'System.currentTimeMillis()' / 'java.time' access. [elapsedRealtime]
  * has no multiplatform stdlib equivalent, so it is backed by an [expect]/[actual] platform
- * function (Android `SystemClock.elapsedRealtime()`, iOS `NSProcessInfo.systemUptime`).
+ * function (Android 'SystemClock.elapsedRealtime()', iOS 'NSProcessInfo.systemUptime').
  *
- * Android callers that need `java.time` values (e.g. [java.time.ZonedDateTime] for scheduling
- * arithmetic) use the `todayZoned()` / `todayLocal()` extensions declared in the `:app` module.
+ * Android callers that need 'java.time' values (e.g. [java.time.ZonedDateTime] for scheduling
+ * arithmetic) use the 'todayZoned()' / 'todayLocal()' extensions declared in the ':app' module.
  */
 interface AppClock {
 

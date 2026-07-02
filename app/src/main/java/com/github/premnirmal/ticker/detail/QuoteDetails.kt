@@ -9,9 +9,9 @@ import com.github.premnirmal.tickerwidget.R
 
 /**
  * Builds the localised list of [QuoteDetailItem] rows for the quote-detail screen from a fetched
- * [QuoteWithSummary]. Kept in `:app` (rather than the shared [QuoteDetailViewModel]) because both the
+ * [QuoteWithSummary]. Kept in ':app' (rather than the shared [QuoteDetailViewModel]) because both the
  * label and the formatted [QuoteDetailItem.data] depend on Android string resources and
- * `Context`-based number/date formatting; the `@StringRes` titles are resolved to plain [String]s
+ * 'Context'-based number/date formatting; the '@StringRes' titles are resolved to plain [String]s
  * here so the shared screen renders a fully-resolved [QuoteDetailItem].
  */
 fun buildQuoteDetails(summary: QuoteWithSummary, context: Context): List<QuoteDetailItem> {

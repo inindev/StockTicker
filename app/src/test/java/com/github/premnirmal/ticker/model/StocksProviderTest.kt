@@ -10,14 +10,16 @@ import com.github.premnirmal.ticker.components.AppClock
 import com.github.premnirmal.ticker.network.StocksApi
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.ticker.repo.StocksStorage
+import com.github.premnirmal.ticker.repo.WatchlistRepository
+import com.github.premnirmal.ticker.repo.data.Watchlist
 import com.github.premnirmal.ticker.widget.WidgetDataProvider
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -41,6 +43,7 @@ class StocksProviderTest : BaseUnitTest() {
     private lateinit var alarmScheduler: AlarmScheduler
     private lateinit var fetchEventLogger: FetchEventLogger
     private lateinit var storage: StocksStorage
+    private lateinit var watchlistRepository: WatchlistRepository
     private lateinit var scope: CoroutineScope
 
     @Before fun initMocks() {
@@ -51,6 +54,7 @@ class StocksProviderTest : BaseUnitTest() {
         alarmScheduler = mock()
         fetchEventLogger = mock()
         storage = mock()
+        watchlistRepository = mock()
         appPreferences = AppPreferences(FakePreferenceStore())
         scope = CoroutineScope(UnconfinedTestDispatcher())
         preferences = ApplicationProvider.getApplicationContext<Context>()
@@ -68,8 +72,18 @@ class StocksProviderTest : BaseUnitTest() {
         tickers: Set<String> = setOf("AAPL", "MSFT"),
         quotes: List<Quote> = emptyList()
     ): StocksProvider {
-        whenever(storage.readTickers()).thenReturn(tickers)
-        runBlocking { whenever(storage.readQuotes()).thenReturn(quotes) }
+        // tickerSet is derived from the All Symbols master list, so the provider loads its initial
+        // initial fetch set from the repository and reconciles via the All Symbols flow.
+        val allSymbols = Watchlist(
+            id = 1L,
+            name = WatchlistRepository.ALL_SYMBOLS_NAME,
+            symbols = tickers.toList(),
+        )
+        runBlocking {
+            whenever(watchlistRepository.getOrCreateAllSymbols()).thenReturn(allSymbols)
+            whenever(storage.readQuotes()).thenReturn(quotes)
+        }
+        whenever(watchlistRepository.allSymbolsFlow()).thenReturn(flowOf(tickers.toList()))
         // A non-zero last-fetched timestamp with no scheduled fetch keeps init from auto-fetching,
         // so each test starts from a deterministic state.
         preferences.edit().putLong("LAST_FETCHED", NOW - MINUTE_MS).commit()
@@ -83,11 +97,12 @@ class StocksProviderTest : BaseUnitTest() {
             alarmScheduler,
             fetchEventLogger,
             storage,
+            watchlistRepository,
             scope
         )
     }
 
-    @Test fun testInitialTickersAreLoadedFromStorage() {
+    @Test fun testInitialTickersAreLoadedFromAllSymbols() {
         val provider = createProvider(tickers = setOf("AAPL", "GOOG"))
         assertTrue(provider.hasTicker("AAPL"))
         assertTrue(provider.hasTicker("GOOG"))
@@ -95,11 +110,10 @@ class StocksProviderTest : BaseUnitTest() {
         assertEquals(setOf("AAPL", "GOOG"), provider.tickers.value.toSet())
     }
 
-    @Test fun testDefaultStocksUsedWhenStorageEmpty() {
-        val provider = createProvider(tickers = emptySet())
-        assertTrue(provider.tickers.value.isNotEmpty())
-        assertTrue(provider.hasTicker("AAPL"))
-        verify(storage).saveTickers(provider.tickers.value.toSet())
+    @Test fun testFreshStoreSeededWithDefaults() {
+        createProvider(tickers = emptySet())
+        // On a fresh store the provider seeds the All Symbols master with the default stocks.
+        runBlocking { verify(watchlistRepository).seedFromTickersIfNeeded(any()) }
     }
 
     @Test fun testAddStockAddsNewTicker() {
@@ -113,7 +127,8 @@ class StocksProviderTest : BaseUnitTest() {
         assertTrue(result.contains("TSLA"))
         assertTrue(provider.hasTicker("TSLA"))
         assertTrue(provider.tickers.value.contains("TSLA"))
-        verify(storage, times(1)).saveTickers(any())
+        // The new symbol is persisted to the durable All Symbols master list.
+        runBlocking { verify(watchlistRepository).addSymbolsToAllSymbols(eq(listOf("TSLA"))) }
     }
 
     @Test fun testAddStockIgnoresDuplicate() {
@@ -122,7 +137,6 @@ class StocksProviderTest : BaseUnitTest() {
         provider.addStock("AAPL")
 
         assertEquals(1, provider.tickers.value.count { it == "AAPL" })
-        verify(storage, never()).saveTickers(any())
     }
 
     @Test fun testAddStocksAddsMultiple() {
@@ -152,6 +166,7 @@ class StocksProviderTest : BaseUnitTest() {
 
             assertFalse(result.contains("AAPL"))
             assertFalse(provider.hasTicker("AAPL"))
+            verify(watchlistRepository).untrack("AAPL")
             verify(storage).removeQuoteBySymbol("AAPL")
         }
     }
@@ -165,6 +180,7 @@ class StocksProviderTest : BaseUnitTest() {
             assertFalse(provider.hasTicker("AAPL"))
             assertFalse(provider.hasTicker("GOOG"))
             assertTrue(provider.hasTicker("MSFT"))
+            verify(watchlistRepository).untrack(eq(listOf("AAPL", "GOOG")))
             verify(storage).removeQuotesBySymbol(any())
         }
     }

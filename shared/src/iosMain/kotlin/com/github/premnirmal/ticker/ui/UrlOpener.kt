@@ -14,7 +14,7 @@ import platform.UIKit.UIWindowScene
  * mirrors the in-app browsing experience users expect when tapping news cards or links from the
  * settings screen.
  *
- * `SFSafariViewController` only supports `http`/`https` URLs, so non-web URLs (and the rare case
+ * 'SFSafariViewController' only supports 'http'/'https' URLs, so non-web URLs (and the rare case
  * where no presenter can be found) fall back to [UIApplication.openURL].
  */
 internal fun openUrlInApp(url: String?) {

@@ -7,10 +7,10 @@ import io.ktor.client.request.get
 
 /**
  * Multiplatform client for the ApeWisdom trending-stocks endpoint. Replaces the Android-only
- * Retrofit interface; the public contract (`suspend fun getTrendingStocks(): TrendingResult`) is
+ * Retrofit interface; the public contract ('suspend fun getTrendingStocks(): TrendingResult') is
  * unchanged so existing callers do not need to be modified.
  *
- * @param baseUrl the ApeWisdom API base URL (e.g. `https://apewisdom.io/api/v1.0/`).
+ * @param baseUrl the ApeWisdom API base URL (e.g. 'https://apewisdom.io/api/v1.0/').
  * @param httpClient the Ktor client to use; defaults to a freshly configured client.
  */
 class ApeWisdom(

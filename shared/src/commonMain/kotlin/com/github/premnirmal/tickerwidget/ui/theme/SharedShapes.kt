@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * The shared cross-platform Material 3 [Shapes] used by both the Android and iOS app themes, so the
- * corner radii are defined once in `commonMain`.
+ * corner radii are defined once in 'commonMain'.
  */
 val appShapes = Shapes(
   small = RoundedCornerShape(24.dp),

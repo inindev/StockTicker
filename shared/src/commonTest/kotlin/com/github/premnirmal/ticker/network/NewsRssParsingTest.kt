@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 
 /**
  * Parsing tests for the shared RSS news layer. These exercise [parseRssFeed] (xmlutil) against
- * representative Yahoo Finance and Google News documents, covering `media:content` thumbnails,
+ * representative Yahoo Finance and Google News documents, covering 'media:content' thumbnails,
  * CDATA descriptions, RFC-1123 date parsing, source-host extraction, and newest-first sorting.
  */
 class NewsRssParsingTest {

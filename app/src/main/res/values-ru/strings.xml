@@ -120,7 +120,6 @@
   <string name="already_in_portfolio">%1$s уже есть в вашем портфеле</string>
   <string name="added_to_list">%1$s добавлено в ваш портфель</string>
   <string name="next_fetch">Следующее обновление данных в %1$s</string>
-  <string name="last_fetch">Данные были получены в %1$s</string>
   <string name="last_and_next_fetch">Данные были получены в %1$s\nСледующее обновление в %2$s</string>
   <string name="total_holdings">Всего активов: %1$s</string>
   <string name="cannot_export_msg">Невозможно экспортировать котировки без разрешения на запись во внешнее хранилище</string>
@@ -212,4 +211,5 @@
   <string name="quote_change_percent_neg">%1$.2f%%</string>
    <string name="exact_alarm_permission_required_message">Разрешение на точные будильники необходимо для своевременного обновления виджета.</string>
    <string name="go_to_settings">Разрешить</string>
+  <string name="updated_at">Обновлено %1$s</string>
  </resources>

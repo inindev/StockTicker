@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 
 class XAxisLabelSpacingTest {
 
-    /** Simulates the chart's `Float` epoch-second timestamps being widened back to `Double`. */
+    /** Simulates the chart's 'Float' epoch-second timestamps being widened back to 'Double'. */
     private fun asChartXValues(epochSeconds: List<Long>): List<Double> =
         epochSeconds.map { it.toFloat().toDouble() }
 
