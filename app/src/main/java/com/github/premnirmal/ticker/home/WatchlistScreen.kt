@@ -90,7 +90,7 @@ fun WatchlistScreen(
     } else {
         WatchlistContent(
             onQuoteClick = { quote ->
-                rootNavController.navigate(route = "${Graph.QUOTE_DETAIL}/${URLEncoder.encode(quote.symbol)}")
+                rootNavController.navigate(route = "${Graph.QUOTE_DETAIL}/${URLEncoder.encode(quote.symbol, "UTF-8")}")
             },
             viewModel = viewModel,
         )

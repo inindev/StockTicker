@@ -5,7 +5,6 @@ import androidx.datastore.core.DataMigration
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 /**
@@ -59,12 +58,6 @@ class AppPreferencesDataMigration(
         // Keep the legacy values in place; only AppPreferences read these keys and it now reads from
         // DataStore. Removing them is unnecessary and avoids any risk to the shared prefs file.
     }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun Preferences.toMutablePreferences() =
-        mutablePreferencesOf(
-            *asMap().map { (k, v) -> (k as Preferences.Key<Any>) to v }.toTypedArray()
-        )
 
     companion object {
         const val MIGRATED_KEY = "shared_prefs_migrated"

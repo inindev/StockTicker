@@ -20,11 +20,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.DisplayFeature
 import com.github.premnirmal.ticker.AppPreferences
 import com.github.premnirmal.ticker.CustomTabs
 import com.github.premnirmal.ticker.navigation.calculateContentAndNavigationType
+import com.github.premnirmal.ticker.network.data.Position
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.ticker.network.data.changeColour
 import com.github.premnirmal.ticker.news.NewsCard
@@ -112,7 +114,9 @@ fun QuoteDetailScreen(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-            holdings = result.data?.getParcelableExtra(HoldingsActivity.POSITIONS) ?: holdings
+            holdings = result.data?.let {
+                IntentCompat.getParcelableExtra(it, HoldingsActivity.POSITIONS, Position::class.java)
+            } ?: holdings
         }
     }
     val alertsLauncher = rememberLauncherForActivityResult(

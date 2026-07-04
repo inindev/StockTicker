@@ -119,6 +119,7 @@ class NotificationsHandler constructor(
             return false
         }
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            @Suppress("DEPRECATION") // intentionally reference the old channel id to delete it
             notificationManager.deleteNotificationChannel(CHANNEL_ID_ALERTS)
             with("Alerts") {
                 val name = this
