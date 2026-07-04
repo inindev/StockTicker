@@ -30,6 +30,9 @@ class FakeStocksProvider(
     private val _fetchState = MutableStateFlow<FetchState>(FetchState.NotFetched)
     override val fetchState: StateFlow<FetchState> = _fetchState
 
+    private val _isFetching = MutableStateFlow(false)
+    override val isFetching: StateFlow<Boolean> = _isFetching
+
     private val _portfolio = MutableStateFlow(quotesBySymbol.values.toList())
     override val portfolio: StateFlow<List<Quote>> = _portfolio
 

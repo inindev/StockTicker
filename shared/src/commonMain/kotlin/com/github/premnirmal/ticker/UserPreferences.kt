@@ -29,12 +29,6 @@ interface UserPreferences {
   /** The raw update-interval selection (0..4) mapped to [updateIntervalMs]. */
   var updateIntervalPref: Int
 
-  /** Whether a widget refresh is currently in progress, as an observable flow. */
-  val isRefreshing: StateFlow<Boolean>
-
-  /** Records whether a widget refresh is currently in progress. */
-  fun setRefreshing(refreshing: Boolean)
-
   /** Whether the onboarding tutorial has been shown. */
   fun tutorialShown(): Boolean
 

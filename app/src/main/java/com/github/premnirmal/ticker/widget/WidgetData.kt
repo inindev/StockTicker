@@ -465,6 +465,24 @@ class WidgetData : IWidgetData, KoinComponent {
         emitWidgetChanges()
     }
 
+    /**
+     * Builds the persisted Glance render state from the live sources of truth: this widget's prefs
+     * and quotes plus the provider's fetch state. Every Glance-state write goes through here so a
+     * stale or interrupted writer can never leave the widget rendering state that disagrees with
+     * the app - in particular the refresh spinner is *derived* from [StocksProvider.isFetching]
+     * rather than toggled on/off by whoever triggered the refresh.
+     */
+    fun glanceStateSnapshot(current: WidgetGlanceState): WidgetGlanceState {
+        return current.copy(
+            widgetState = SerializableWidgetState.from(
+                state = data.value,
+                fetchState = stocksProvider.fetchState.value,
+                isRefreshing = stocksProvider.isFetching.value,
+            ),
+            quotes = stocks.value,
+        )
+    }
+
     fun emitWidgetChanges() {
         // Only real home-screen widgets have a Glance id (always a positive app-widget id). The
         // default in-app list (INVALID_APPWIDGET_ID == 0) has no home-screen widget, so pushing a
@@ -477,20 +495,7 @@ class WidgetData : IWidgetData, KoinComponent {
                     context = context,
                     definition = WidgetGlanceStateDefinition,
                     glanceId = glanceId,
-                ) { state ->
-                    val currentQuotes = stocks.value
-                    val currentState = data.value
-                    val currentFetchState = stocksProvider.fetchState.value
-                    val currentIsRefreshing = appPreferences.isRefreshing.value
-                    state.copy(
-                        widgetState = SerializableWidgetState.from(
-                            state = currentState,
-                            fetchState = currentFetchState,
-                            isRefreshing = currentIsRefreshing
-                        ),
-                        quotes = currentQuotes
-                    )
-                }
+                ) { state -> glanceStateSnapshot(state) }
                 GlanceStocksWidget().update(context, glanceId)
             }
         }

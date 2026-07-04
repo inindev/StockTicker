@@ -55,24 +55,21 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.github.premnirmal.ticker.AppPreferences
 import com.github.premnirmal.ticker.home.HomeActivity
 import com.github.premnirmal.ticker.model.StocksProvider
 import com.github.premnirmal.ticker.network.data.Holding
 import com.github.premnirmal.ticker.network.data.Position
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.tickerwidget.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.random.Random
 
 class GlanceStocksWidget : GlanceAppWidget(), KoinComponent {
 
-    private val stocksProvider: StocksProvider by inject()
-
     private val widgetDataProvider: WidgetDataProvider by inject()
-
-    private val appPreferences: AppPreferences by inject()
 
     override val sizeMode = SizeMode.Exact
 
@@ -85,26 +82,14 @@ class GlanceStocksWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
 
         // Update the Glance state with current widget data and quotes (symbols come from the
-        // widget's associated watchlist).
+        // widget's associated watchlist). The snapshot logic is shared with every other Glance
+        // writer via [WidgetData.glanceStateSnapshot].
         val widgetData = widgetDataProvider.refreshWidgetData(appWidgetId)
         updateAppWidgetState(
             context = context,
             definition = stateDefinition,
             glanceId = id
-        ) { state ->
-            val currentQuotes = widgetData.stocks.value
-            val currentState = widgetData.data.value
-            val currentFetchState = stocksProvider.fetchState.value
-            val currentIsRefreshing = appPreferences.isRefreshing.value
-            state.copy(
-                widgetState = SerializableWidgetState.from(
-                    state = currentState,
-                    fetchState = currentFetchState,
-                    isRefreshing = currentIsRefreshing,
-                ),
-                quotes = currentQuotes,
-            )
-        }
+        ) { state -> widgetData.glanceStateSnapshot(state) }
 
         provideContent {
             val glanceState = currentState<WidgetGlanceState>()
@@ -680,52 +665,24 @@ private fun previewDataState(
 class RefreshCallback : ActionCallback, KoinComponent {
     private val stocksProvider: StocksProvider by inject()
 
-    private val appPreferences: AppPreferences by inject()
-
-    private val widgetDataProvider: WidgetDataProvider by inject()
+    private val coroutineScope: CoroutineScope by inject()
 
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        val glanceAppWidgetManager = GlanceAppWidgetManager(context)
-        val appWidgetId = glanceAppWidgetManager.getAppWidgetId(glanceId)
-        appPreferences.setRefreshing(true)
-        updateAppWidgetState(
-            context = context,
-            definition = WidgetGlanceStateDefinition,
-            glanceId = glanceId
-        ) { currentState ->
-            currentState.copy(
-                widgetState = currentState.widgetState.copy(isRefreshing = true)
-            )
-        }
-
-        stocksProvider.fetch()
-
-        val widgetData = widgetDataProvider.refreshWidgetData(appWidgetId)
-        val currentQuotes = widgetData.stocks.value
-        val currentFetchState = stocksProvider.fetchState.value
-        updateAppWidgetState(
-            context = context,
-            definition = WidgetGlanceStateDefinition,
-            glanceId = glanceId,
-        ) { currentState ->
-            currentState.copy(
-                quotes = currentQuotes,
-                widgetState = currentState.widgetState.copy(
-                    fetchState = SerializableFetchState.from(currentFetchState),
-                    isRefreshing = false,
-                )
-            )
+        // Hand the fetch to the app-scoped coroutine and return immediately: Glance action
+        // callbacks run inside a broadcast receiver, which the OS kills after ~10 seconds -
+        // far less than a worst-case fetch. The spinner and the post-fetch re-render are driven
+        // by observers of [StocksProvider.isFetching], so nothing needs to be written here.
+        coroutineScope.launch {
+            stocksProvider.fetch()
         }
     }
 }
 
 class FlipTextCallback : ActionCallback, KoinComponent {
-    private val stocksProvider: StocksProvider by inject()
-
     private val widgetDataProvider: WidgetDataProvider by inject()
 
     override suspend fun onAction(
@@ -733,30 +690,10 @@ class FlipTextCallback : ActionCallback, KoinComponent {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        val glanceAppWidgetManager = GlanceAppWidgetManager(context)
-        val appWidgetId = glanceAppWidgetManager.getAppWidgetId(glanceId)
+        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
         val widgetData = widgetDataProvider.refreshWidgetData(appWidgetId)
-        val currentQuotes = widgetData.stocks.value
-        val currentFetchState = stocksProvider.fetchState.value
-        // Update Glance state with the flipped change type
-        updateAppWidgetState(
-            context = context,
-            definition = WidgetGlanceStateDefinition,
-            glanceId = glanceId,
-        ) { currentState ->
-            val newChangeType = if (currentState.widgetState.changeType == SerializableChangeType.Value) {
-                SerializableChangeType.Percent
-            } else {
-                SerializableChangeType.Value
-            }
-            widgetData.setChange(newChangeType == SerializableChangeType.Percent)
-            currentState.copy(
-                quotes = currentQuotes,
-                widgetState = currentState.widgetState.copy(
-                    changeType = newChangeType,
-                    fetchState = SerializableFetchState.from(currentFetchState),
-                )
-            )
-        }
+        // The widget's own preferences are the source of truth for the change type; setChange
+        // persists the flipped value and pushes a fresh Glance snapshot.
+        widgetData.setChange(widgetData.changeType == IWidgetData.ChangeType.Value)
     }
 }

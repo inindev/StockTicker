@@ -7,10 +7,10 @@ import com.github.premnirmal.ticker.isNetworkOnline
 import com.github.premnirmal.ticker.model.AlarmScheduler
 import com.github.premnirmal.ticker.model.FetchEventLogger
 import com.github.premnirmal.ticker.model.StocksProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -58,17 +58,10 @@ class RefreshReceiver : BroadcastReceiver(), KoinComponent {
 
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                val result = withTimeoutOrNull(30_000L) {
-                    stocksProvider.fetch()
-                }
-                if (result == null) {
-                    Timber.w("Fetch operation timed out")
-                    fetchEventLogger.log(
-                        source = "RefreshReceiver",
-                        event = "timeout",
-                        detail = "fetch timeout after 30000ms"
-                    )
-                } else if (result.hasError) {
+                // The fetch is internally bounded by StocksProvider's own timeout, so no outer
+                // timeout is needed; a timeout surfaces as a failure result here.
+                val result = stocksProvider.fetch()
+                if (result.hasError) {
                     Timber.w(result.error, "Fetch failed in RefreshReceiver")
                     fetchEventLogger.log(
                         source = "RefreshReceiver",
@@ -83,6 +76,8 @@ class RefreshReceiver : BroadcastReceiver(), KoinComponent {
                         detail = "fetch completed"
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Error in RefreshReceiver")
                 fetchEventLogger.log(

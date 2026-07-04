@@ -56,11 +56,13 @@ class StocksProvider(
     private val _portfolio = MutableStateFlow<List<Quote>>(emptyList())
     private val _nextFetch = MutableStateFlow(0L)
     private val _fetchState = MutableStateFlow<FetchState>(FetchState.NotFetched)
+    private val _isFetching = MutableStateFlow(false)
 
     override val tickers: StateFlow<List<String>> get() = _tickers
     override val portfolio: StateFlow<List<Quote>> get() = _portfolio
     override val nextFetchMs: StateFlow<Long> get() = _nextFetch
     override val fetchState: StateFlow<FetchState> get() = _fetchState
+    override val isFetching: StateFlow<Boolean> get() = _isFetching
 
     init {
         lastFetched = store.getLong(LAST_FETCHED, 0L)
@@ -170,7 +172,6 @@ class StocksProvider(
         _nextFetch.value = nextAt
         store.setLong(NEXT_FETCH, nextAt)
         logFetchEvent(event = "schedule_next", detail = "reason=$reason delayMs=$clampedDelayMs nextAt=$nextAt")
-        appPreferences.setRefreshing(false)
     }
 
     private fun resetConsecutiveFailures() = store.setInt(CONSECUTIVE_FETCH_FAILURES, 0)
@@ -230,7 +231,7 @@ class StocksProvider(
         var failureReason = "unknown"
         try {
             logFetchEvent(event = "fetch_start", detail = "allowScheduling=$allowScheduling tickers=${tickerSet.size}")
-            if (allowScheduling) appPreferences.setRefreshing(true)
+            if (allowScheduling) _isFetching.value = true
             val fr = api.getStocks(tickerSet.toList())
             if (fr.hasError) {
                 failureReason = "api_error"
@@ -254,19 +255,20 @@ class StocksProvider(
                 scheduleUpdate(reason = "fetch_success")
                 shouldScheduleInFinally = false
             }
-            appPreferences.setRefreshing(false)
             onQuotesUpdated()
             logFetchEvent(event = "fetch_success", detail = "stocks=${fetchedStocks.size}")
             FetchResult.success(quoteMap.values.filter { tickerSet.contains(it.symbol) }.toList())
         } catch (ex: CancellationException) {
-            shouldScheduleInFinally = false
+            // Rethrow so the caller sees the cancellation; the finally block below still
+            // reschedules, so a cancelled fetch can never kill the refresh chain.
+            failureReason = "cancelled"
             throw ex
         } catch (ex: Throwable) {
             failureReason = ex::class.simpleName ?: "Throwable"
             AppLogger.w(ex, "Fetch failed")
             FetchResult.failure(FetchException("Failed to fetch", ex))
         } finally {
-            appPreferences.setRefreshing(false)
+            _isFetching.value = false
             if (shouldScheduleInFinally) {
                 logFetchEvent(event = "fetch_failure", detail = "reason=$failureReason")
                 runCatching { scheduleFailureBackoff(failureReason) }

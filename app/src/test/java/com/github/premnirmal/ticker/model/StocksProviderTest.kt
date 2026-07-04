@@ -3,9 +3,7 @@ package com.github.premnirmal.ticker.model
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
-import com.github.premnirmal.ticker.AppPreferences
 import com.github.premnirmal.ticker.BaseUnitTest
-import com.github.premnirmal.ticker.FakePreferenceStore
 import com.github.premnirmal.ticker.components.AppClock
 import com.github.premnirmal.ticker.network.StocksApi
 import com.github.premnirmal.ticker.network.data.Quote
@@ -38,7 +36,6 @@ class StocksProviderTest : BaseUnitTest() {
     private lateinit var api: StocksApi
     private lateinit var preferences: SharedPreferences
     private lateinit var clock: AppClock
-    private lateinit var appPreferences: AppPreferences
     private lateinit var widgetDataProvider: WidgetDataProvider
     private lateinit var alarmScheduler: AlarmScheduler
     private lateinit var fetchEventLogger: FetchEventLogger
@@ -55,7 +52,6 @@ class StocksProviderTest : BaseUnitTest() {
         fetchEventLogger = mock()
         storage = mock()
         watchlistRepository = mock()
-        appPreferences = AppPreferences(FakePreferenceStore())
         scope = CoroutineScope(UnconfinedTestDispatcher())
         preferences = ApplicationProvider.getApplicationContext<Context>()
             .getSharedPreferences("StocksProviderTest", Context.MODE_PRIVATE)
@@ -92,7 +88,6 @@ class StocksProviderTest : BaseUnitTest() {
             api,
             preferences,
             clock,
-            appPreferences,
             widgetDataProvider,
             alarmScheduler,
             fetchEventLogger,

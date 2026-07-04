@@ -77,7 +77,6 @@ class AppPreferencesDataMigration(
         )
 
         private val BOOLEAN_KEYS = listOf(
-            AppPreferences.WIDGET_REFRESHING,
             AppPreferences.TUTORIAL_SHOWN,
             AppPreferences.SETTING_ROUND_TWO_DP,
             AppPreferences.SETTING_NOTIFICATION_ALERTS

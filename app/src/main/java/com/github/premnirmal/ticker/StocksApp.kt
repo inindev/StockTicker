@@ -9,10 +9,12 @@ import com.github.premnirmal.ticker.components.LoggingTree
 import com.github.premnirmal.ticker.components.appModule
 import com.github.premnirmal.ticker.components.viewModelModule
 import com.github.premnirmal.ticker.di.sharedModule
+import com.github.premnirmal.ticker.model.StocksProvider
 import com.github.premnirmal.ticker.network.networkModule
 import com.github.premnirmal.ticker.notifications.NotificationsHandler
 import com.github.premnirmal.ticker.widget.WidgetDataProvider
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
@@ -30,6 +32,10 @@ open class StocksApp : Application(), KoinComponent, SingletonImageLoader.Factor
 
     private val widgetDataProvider: WidgetDataProvider by inject()
 
+    private val stocksProvider: StocksProvider by inject()
+
+    private val coroutineScope: CoroutineScope by inject()
+
     private val imageLoader: ImageLoader by inject()
 
     override fun newImageLoader(context: PlatformContext): ImageLoader = imageLoader
@@ -43,7 +49,15 @@ open class StocksApp : Application(), KoinComponent, SingletonImageLoader.Factor
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(appPreferences.nightMode.toAppCompatNightMode())
         initNotificationHandler()
-        runBlocking { widgetDataProvider.refreshWidgetDataList() }
+        // Re-render every home-screen widget whenever a refresh starts or finishes. The widget's
+        // spinner is *derived* from [StocksProvider.isFetching], and this collector is what
+        // repaints it; the collector's initial emission also doubles as the process-start push,
+        // so a spinner left rendered by a killed process is cleared on the next launch.
+        coroutineScope.launch {
+            stocksProvider.isFetching.collect {
+                widgetDataProvider.broadcastUpdateAllWidgets()
+            }
+        }
     }
 
     protected open fun initNotificationHandler() {

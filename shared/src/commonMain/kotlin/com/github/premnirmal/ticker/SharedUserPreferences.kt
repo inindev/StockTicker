@@ -48,16 +48,6 @@ open class SharedUserPreferences(
             store.setInt(UPDATE_INTERVAL, value)
         }
 
-    private val _isRefreshing = MutableStateFlow(store.getBoolean(WIDGET_REFRESHING, false))
-
-    override val isRefreshing: StateFlow<Boolean>
-        get() = _isRefreshing
-
-    override fun setRefreshing(refreshing: Boolean) {
-        _isRefreshing.value = refreshing
-        store.setBoolean(WIDGET_REFRESHING, refreshing)
-    }
-
     override fun tutorialShown(): Boolean = store.getBoolean(TUTORIAL_SHOWN, false)
 
     override fun setTutorialShown(shown: Boolean) {
@@ -162,7 +152,6 @@ open class SharedUserPreferences(
 
     companion object {
         const val UPDATE_INTERVAL = "UPDATE_INTERVAL"
-        const val WIDGET_REFRESHING = "WIDGET_REFRESHING"
         const val TUTORIAL_SHOWN = "TUTORIAL_SHOWN"
         const val APP_VERSION_CODE = "APP_VERSION_CODE"
         const val SETTING_ROUND_TWO_DP = "SETTING_ROUND_TWO_DP"

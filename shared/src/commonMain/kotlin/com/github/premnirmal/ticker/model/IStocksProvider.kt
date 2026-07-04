@@ -30,6 +30,14 @@ interface IStocksProvider {
   /** The state of the most recent refresh (not fetched / success / failure), as an observable flow. */
   val fetchState: StateFlow<FetchState>
 
+  /**
+   * Whether a user-visible refresh (a [fetch] with 'allowScheduling = true') is currently in flight.
+   * Derived from the live fetch call itself - set when the fetch starts and always cleared in its
+   * 'finally' - so it can never be left stuck 'true' by an interrupted caller, and it is
+   * intentionally not persisted: a process that died mid-fetch is by definition not fetching.
+   */
+  val isFetching: StateFlow<Boolean>
+
   /** The current portfolio quotes, as an observable flow. */
   val portfolio: StateFlow<List<Quote>>
 

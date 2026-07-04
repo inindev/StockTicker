@@ -63,7 +63,6 @@ class AppPreferences constructor(
         const val PREFERENCE_SHOWN_ADD_REMOVE_TOOLTIP = "PREFERENCE_SHOWN_ADD_REMOVE_TOOLTIP"
 
         const val WIDGET_BG = "WIDGET_BG"
-        const val WIDGET_REFRESHING = "WIDGET_REFRESHING"
         const val TEXT_COLOR = "TEXT_COLOR"
         const val UPDATE_INTERVAL = "UPDATE_INTERVAL"
         const val LAYOUT_TYPE = "LAYOUT_TYPE"

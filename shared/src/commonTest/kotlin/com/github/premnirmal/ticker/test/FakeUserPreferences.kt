@@ -16,12 +16,6 @@ class FakeUserPreferences : UserPreferences {
     override val updateIntervalMs: Long = 0L
     override var updateIntervalPref: Int = 0
 
-    private val _isRefreshing = MutableStateFlow(false)
-    override val isRefreshing: StateFlow<Boolean> = _isRefreshing
-    override fun setRefreshing(refreshing: Boolean) {
-        _isRefreshing.value = refreshing
-    }
-
     private var tutorialShown = false
     override fun tutorialShown(): Boolean = tutorialShown
     override fun setTutorialShown(shown: Boolean) {

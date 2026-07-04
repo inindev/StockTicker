@@ -3,7 +3,6 @@ package com.github.premnirmal.ticker.model
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.github.premnirmal.ticker.AppPreferences
 import com.github.premnirmal.ticker.components.AppClock
 import com.github.premnirmal.ticker.network.StocksApi
 import com.github.premnirmal.ticker.network.data.Holding
@@ -15,11 +14,15 @@ import com.github.premnirmal.ticker.widget.WidgetDataProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import timber.log.Timber
 import java.util.concurrent.TimeUnit.MINUTES
 
@@ -31,7 +34,6 @@ class StocksProvider constructor(
     private val api: StocksApi,
     private val preferences: SharedPreferences,
     private val clock: AppClock,
-    private val appPreferences: AppPreferences,
     private val widgetDataProvider: WidgetDataProvider,
     private val alarmScheduler: AlarmScheduler,
     private val fetchEventLogger: FetchEventLogger,
@@ -46,6 +48,9 @@ class StocksProvider constructor(
         private const val CONSECUTIVE_FETCH_FAILURES = "CONSECUTIVE_FETCH_FAILURES"
         private const val MIN_SCHEDULE_MS = 15_000L
         private const val MAX_FAILURE_BACKOFF_MS = 30 * 60 * 1000L
+        // Hard deadline for the network portion of a fetch, so a stalled request can never leave
+        // the refresh spinner spinning or the scheduling chain waiting indefinitely.
+        private const val FETCH_TIMEOUT_MS = 30_000L
         private val DEFAULT_STOCKS = arrayOf("^GSPC", "^DJI", "GOOG", "AAPL", "MSFT")
         const val DEFAULT_INTERVAL_MS: Long = 15_000L
     }
@@ -59,11 +64,18 @@ class StocksProvider constructor(
     override val fetchState: StateFlow<FetchState>
         get() = _fetchState
 
+    override val isFetching: StateFlow<Boolean>
+        get() = _isFetching
+
     override val nextFetchMs: StateFlow<Long>
         get() = _nextFetch
 
     private val tickerSet: MutableSet<String> = HashSet()
     private val quoteMap: MutableMap<String, Quote> = HashMap()
+    // Serializes fetches so concurrent triggers (alarm, worker, widget tap, pull-to-refresh,
+    // realtime loop) can never interleave their state updates.
+    private val fetchMutex = Mutex()
+    private val _isFetching = MutableStateFlow(false)
     private val _fetchState = MutableStateFlow<FetchState>(FetchState.NotFetched)
     private val _nextFetch = MutableStateFlow<Long>(0)
     private var lastFetched = 0L
@@ -168,7 +180,6 @@ class StocksProvider constructor(
             event = "schedule_next",
             detail = "reason=$reason delayMs=$clampedDelayMs nextAt=${updateTime.toInstant()}"
         )
-        appPreferences.setRefreshing(false)
     }
 
     private fun logFetchEvent(event: String, detail: String) =
@@ -255,11 +266,12 @@ class StocksProvider constructor(
         return tickerSet.contains(ticker)
     }
 
-    override suspend fun fetch(allowScheduling: Boolean): FetchResult<List<Quote>> = withContext(Dispatchers.IO) {
-        if (tickerSet.isEmpty()) {
-            Timber.d("No tickers/symbols to fetch")
-            FetchResult.failure<List<Quote>>(FetchException("No symbols in portfolio"))
-        } else {
+    override suspend fun fetch(allowScheduling: Boolean): FetchResult<List<Quote>> = fetchMutex.withLock {
+        withContext(Dispatchers.IO) {
+            if (tickerSet.isEmpty()) {
+                Timber.d("No tickers/symbols to fetch")
+                return@withContext FetchResult.failure<List<Quote>>(FetchException("No symbols in portfolio"))
+            }
             var shouldScheduleInFinally = allowScheduling
             var failureReason = "unknown"
             var failureError: Throwable? = null
@@ -270,9 +282,11 @@ class StocksProvider constructor(
                     detail = "allowScheduling=$allowScheduling tickers=${tickerSet.size}"
                 )
                 if (allowScheduling) {
-                    appPreferences.setRefreshing(true)
+                    _isFetching.value = true
                 }
-                val fr = api.getStocks(tickerSet.toList())
+                val fr = withTimeout(FETCH_TIMEOUT_MS) {
+                    api.getStocks(tickerSet.toList())
+                }
                 if (fr.hasError) {
                     failureReason = "api_error"
                     throw fr.error
@@ -297,7 +311,6 @@ class StocksProvider constructor(
                         scheduleUpdate(reason = "fetch_success")
                         shouldScheduleInFinally = false
                     }
-                    appPreferences.setRefreshing(false)
                     widgetDataProvider.broadcastUpdateAllWidgets()
                     Timber.d("Fetch succeeded stocks=%d", fetchedStocks.size)
                     logFetchEvent(
@@ -306,18 +319,24 @@ class StocksProvider constructor(
                     )
                     FetchResult.success(quoteMap.values.filter { tickerSet.contains(it.symbol) }.toList())
                 }
+            } catch (ex: TimeoutCancellationException) {
+                failureReason = "timeout"
+                failureError = ex
+                Timber.w("Fetch timed out after ${FETCH_TIMEOUT_MS}ms")
+                FetchResult.failure<List<Quote>>(FetchException("Fetch timed out", ex))
             } catch (ex: CancellationException) {
-                shouldScheduleInFinally = false
+                // Rethrow so the caller sees the cancellation; the finally block below still
+                // reschedules, so a cancelled fetch can never kill the refresh chain.
                 failureReason = "cancelled"
                 failureError = ex
-                FetchResult.failure<List<Quote>>(FetchException("Failed to fetch", ex))
+                throw ex
             } catch (ex: Throwable) {
                 failureReason = ex::class.java.simpleName
                 failureError = ex
                 Timber.w(ex)
                 FetchResult.failure<List<Quote>>(FetchException("Failed to fetch", ex))
             } finally {
-                appPreferences.setRefreshing(false)
+                _isFetching.value = false
                 if (shouldScheduleInFinally) {
                     // Keep scheduling chain alive across transient failures.
                     logFetchEvent(

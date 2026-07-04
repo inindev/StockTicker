@@ -52,13 +52,6 @@ class UserDefaultsPreferencesTest {
     }
 
     @Test
-    fun isRefreshingFlowUpdates() {
-        assertFalse(preferences.isRefreshing.value)
-        preferences.setRefreshing(true)
-        assertTrue(preferences.isRefreshing.value)
-    }
-
-    @Test
     fun themePrefRoundTrip() {
         preferences.themePref = 1
         assertEquals(1, preferences.themePref)
