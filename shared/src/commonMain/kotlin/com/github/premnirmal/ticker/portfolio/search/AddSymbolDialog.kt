@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -63,6 +66,11 @@ data class SuggestionWidgetDataState(
     val watchlistName: String,
     val watchlistId: Long,
     val exists: Boolean,
+    /**
+     * True for the **All Symbols** master list. Every symbol is always a member (adding to any
+     * watchlist adds it here too), so its checkbox is rendered checked and non-deselectable.
+     */
+    val isAllSymbols: Boolean = false,
 )
 
 /** Reason a [AddSymbolDialogContent] "New Watchlist" creation was rejected. */
@@ -119,6 +127,13 @@ fun AddSymbolDialogContent(
                         )
                         FilledIconButton(
                             onClick = {
+                                // The All Symbols row is always shown checked but its checkbox is
+                                // non-interactive, so confirming is what commits the symbol to the
+                                // master list. Subset toggles already add to All Symbols live; this
+                                // covers the All-Symbols-only case. addSymbol is idempotent.
+                                suggestionState.widgetDataList
+                                    .firstOrNull { it.isAllSymbols && !it.exists }
+                                    ?.let(onAdded)
                                 onDismissRequest()
                                 openDialog.value = false
                             }
@@ -147,22 +162,34 @@ fun AddSymbolDialogContent(
             items(suggestionState.widgetDataList.size) { i ->
                 val widgetData = suggestionState.widgetDataList[i]
                 val exists = remember(widgetData) { widgetData.exists }
+                // The row is the toggle target and every Checkbox gets onCheckedChange = null:
+                // an interactive Checkbox reserves a 48dp touch target that insets it, so routing
+                // taps through the row keeps every checkbox flush-left and aligned. All Symbols
+                // renders enabled (not greyed) but its tap is a no-op - it can't be unchecked here;
+                // its membership is committed by the done button.
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .toggleable(
+                            value = widgetData.isAllSymbols || exists,
+                            enabled = true,
+                            role = Role.Checkbox,
+                        ) {
+                            when {
+                                widgetData.isAllSymbols -> {}
+                                exists -> onRemoved(widgetData)
+                                else -> onAdded(widgetData)
+                            }
+                        }
+                        .heightIn(min = 48.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(
-                        checked = exists,
-                        onCheckedChange = {
-                            if (exists) {
-                                onRemoved(widgetData)
-                            } else {
-                                onAdded(widgetData)
-                            }
-                        },
+                        checked = widgetData.isAllSymbols || exists,
+                        enabled = true,
+                        onCheckedChange = null,
                     )
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         modifier = Modifier.weight(1f),
                         text = AnnotatedString(widgetData.watchlistName),

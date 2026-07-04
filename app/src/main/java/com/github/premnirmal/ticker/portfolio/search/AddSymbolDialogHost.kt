@@ -47,7 +47,8 @@ fun AddSymbolScreenPreview() {
                         "AAPL",
                         "All Symbols",
                         1L,
-                        true
+                        true,
+                        isAllSymbols = true,
                     ),
                     SuggestionWidgetDataState(
                         "AAPL",

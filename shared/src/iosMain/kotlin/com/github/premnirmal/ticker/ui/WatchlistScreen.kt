@@ -14,15 +14,16 @@ import com.github.premnirmal.shared.resources.ic_money
 import com.github.premnirmal.shared.resources.updated_at
 import com.github.premnirmal.ticker.UserPreferences
 import com.github.premnirmal.ticker.components.AppNumberFormat
-import com.github.premnirmal.ticker.detail.QuoteCard
 import com.github.premnirmal.ticker.home.ManageWatchlistItem
 import com.github.premnirmal.ticker.home.ManageWatchlistsDialogContent
 import com.github.premnirmal.ticker.home.NewWatchlistPrompt
+import com.github.premnirmal.ticker.home.QuoteRow
 import com.github.premnirmal.ticker.home.TotalGainLoss
 import com.github.premnirmal.ticker.home.TotalHoldingsPopup
 import com.github.premnirmal.ticker.home.WatchlistContent
 import com.github.premnirmal.ticker.home.WatchlistWidget
 import com.github.premnirmal.ticker.model.FetchState
+import com.github.premnirmal.ticker.model.SparkProvider
 import com.github.premnirmal.ticker.model.StocksProvider
 import com.github.premnirmal.ticker.navigation.HomeRoute
 import com.github.premnirmal.ticker.navigation.rememberScrollToTopAction
@@ -44,6 +45,7 @@ private object WatchlistKoin : KoinComponent {
     val stocksProvider: StocksProvider by inject()
     val userPreferences: UserPreferences by inject()
     val watchlistRepository: WatchlistRepository by inject()
+    val sparkProvider: SparkProvider by inject()
 }
 
 /**
@@ -65,6 +67,7 @@ fun WatchlistScreen(
     val provider = remember { WatchlistKoin.stocksProvider }
     val userPreferences = remember { WatchlistKoin.userPreferences }
     val repository = remember { WatchlistKoin.watchlistRepository }
+    val sparkProvider = remember { WatchlistKoin.sparkProvider }
     val scope = rememberCoroutineScope()
 
     val quotes by provider.portfolio.collectAsState()
@@ -187,14 +190,21 @@ fun WatchlistScreen(
         totalHoldingsIcon = painterResource(Res.drawable.ic_money),
         onRefresh = onRefresh,
         onQuoteClick = onQuoteClick,
-        quoteCard = { quote, cardModifier, interactionSource, onClick, onRemoveClick ->
-            QuoteCard(
-                quote = quote,
-                modifier = cardModifier,
-                interactionSource = interactionSource,
-                onClick = { onClick() },
-                showMore = true,
-                onRemoveClick = onRemoveClick,
+        prefetchSparks = { symbols -> sparkProvider.prefetch(symbols) },
+        quoteCard = { slot ->
+            val sparkData by sparkProvider.spark(slot.quote.symbol).collectAsState()
+            QuoteRow(
+                quote = slot.quote,
+                modifier = slot.modifier,
+                dragHandleModifier = slot.dragHandleModifier,
+                interactionSource = slot.interactionSource,
+                isEditing = slot.isEditing,
+                displayMode = slot.displayMode,
+                onClick = { slot.onClick() },
+                onLongClick = slot.onLongClick,
+                onRemoveClick = slot.onRemove,
+                onPillClick = slot.onPillClick,
+                sparkData = sparkData,
             )
         },
         totalHoldingsPopup = { totals, onDismiss ->

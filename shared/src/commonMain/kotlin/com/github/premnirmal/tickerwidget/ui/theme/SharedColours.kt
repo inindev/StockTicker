@@ -36,6 +36,19 @@ object SharedColours {
 
   val ImagePlaceHolderGray = Color(0x20a7a7a7)
 
+  // Filled change-pill colours for the watchlist rows (white text on a solid fill, same in both
+  // themes). The text-oriented change colours above are too light to work as fills.
+  val PillPositive = Color(0xFF34C759)
+  val PillNegative = Color(0xFFFF3B30)
+  val PillNeutral = Color(0xFF8E8E93)
+
+  /** Resolves the filled change-pill background for a value that moved up/down/unchanged. */
+  fun pillColour(up: Boolean, down: Boolean): Color = when {
+    up -> PillPositive
+    down -> PillNegative
+    else -> PillNeutral
+  }
+
   /**
    * Resolves the colour used to render a value that moved up/down/unchanged, matching
    * [PositiveGreen]/[NegativeRed] and falling back to the theme's 'onSurfaceVariant'.

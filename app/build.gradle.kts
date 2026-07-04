@@ -1,9 +1,7 @@
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import com.github.premnirmal.gradle.getOldGitVersionFromGit
 import com.github.premnirmal.gradle.getVersionNameFromGit
-import java.io.FileInputStream
 import java.util.Locale
-import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 
@@ -62,21 +60,6 @@ android {
     buildConfigField("String", "PREVIOUS_VERSION", "\"$oldGitVersion\"")
   }
 
-  signingConfigs {
-    create("release") {
-      storeFile = file("keystore.jks")
-
-      val propsFile: File = file("keystore.properties")
-      if (propsFile.exists()) {
-        val props: Properties = Properties()
-        props.load(FileInputStream(propsFile))
-        storePassword = props.getProperty("key.store.password")
-        keyPassword = props.getProperty("key.alias.password")
-        keyAlias = props.getProperty("key.alias.alias")
-      }
-    }
-  }
-
   flavorDimensions += "mobile"
 
   productFlavors {
@@ -109,11 +92,6 @@ android {
   buildTypes {
     release {
       isDebuggable = false
-      // Only apply the release signing config when a keystore is present; otherwise
-      // produce an unsigned APK so it can be signed manually (e.g. with the debug key).
-      if (file("keystore.jks").exists()) {
-        signingConfig = signingConfigs.getByName("release")
-      }
       isMinifyEnabled = true
       setProguardFiles(listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"))
     }

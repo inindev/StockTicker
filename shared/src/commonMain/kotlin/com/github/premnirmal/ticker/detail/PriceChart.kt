@@ -192,6 +192,14 @@ fun PriceChartView(
         pointConnector = LineCartesianLayer.PointConnector.cubic(curvature = 0.1f)
     )
 
+    // Vico's default axis label style is not Material-theme aware, so its dark text is illegible
+    // on the dark theme's near-black surface; onSurfaceVariant tracks the theme in both modes.
+    val axisLabel = rememberTextComponent(
+        style = TextStyle(
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
+    )
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberLineCartesianLayer(
@@ -200,6 +208,7 @@ fun PriceChartView(
                 verticalAxisPosition = Axis.Position.Vertical.End
             ),
             endAxis = VerticalAxis.rememberEnd(
+                label = axisLabel,
                 valueFormatter = remember(yAxisFormatter) {
                     CartesianValueFormatter { _, value, _ -> yAxisFormatter(value) }
                 },
@@ -207,6 +216,7 @@ fun PriceChartView(
                 guideline = null
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
+                label = axisLabel,
                 valueFormatter = remember(xAxisFormatter) {
                     CartesianValueFormatter { _, value, _ -> xAxisFormatter(value) }
                 },

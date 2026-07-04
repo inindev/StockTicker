@@ -43,6 +43,7 @@ class SuggestionViewModel constructor(
                             watchlistName = watchlist.name,
                             watchlistId = watchlist.id,
                             exists = watchlist.symbols.contains(symbol),
+                            isAllSymbols = watchlist.name == WatchlistRepository.ALL_SYMBOLS_NAME,
                         )
                     },
                 )

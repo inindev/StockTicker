@@ -18,6 +18,7 @@
     <string name="watchlist_exists">A watchlist with that name already exists</string>
     <string name="watchlist_name_blank">Enter a name</string>
     <string name="save">Save</string>
+    <string name="edit_watchlist">Edit List</string>
     <string name="manage_watchlists">Manage Watchlists</string>
     <string name="manage_watchlists_subtitle">Create, rename, and delete watchlists.</string>
     <string name="rename_watchlist">Rename Watchlist</string>

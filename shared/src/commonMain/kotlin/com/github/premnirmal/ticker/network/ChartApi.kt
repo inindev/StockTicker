@@ -1,6 +1,7 @@
 package com.github.premnirmal.ticker.network
 
 import com.github.premnirmal.ticker.network.data.HistoricalDataResult
+import com.github.premnirmal.ticker.network.data.SparkResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -34,6 +35,23 @@ class ChartApi(
             // appendPathSegments percent-encodes the symbol (e.g. "^GSPC"), matching Retrofit's
             // @Path encoding.
             url { appendPathSegments("chart", symbol) }
+            parameter("interval", interval)
+            parameter("range", range)
+        }.body()
+
+    /**
+     * Batch mini-chart fetch for the watchlist sparklines: one request for all [symbols] against
+     * the 'spark' sibling of the chart endpoint. Unknown symbols are simply absent from the
+     * returned map.
+     */
+    suspend fun fetchSparkData(
+        symbols: List<String>,
+        interval: String,
+        range: String
+    ): Map<String, SparkResult> =
+        httpClient.get(baseUrl.trimEnd('/')) {
+            url { appendPathSegments("spark") }
+            parameter("symbols", symbols.joinToString(","))
             parameter("interval", interval)
             parameter("range", range)
         }.body()

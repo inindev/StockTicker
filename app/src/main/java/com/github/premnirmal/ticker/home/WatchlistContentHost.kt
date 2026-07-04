@@ -11,13 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.premnirmal.ticker.detail.QuoteCard
 import com.github.premnirmal.ticker.model.FetchState
+import com.github.premnirmal.ticker.model.SparkProvider
 import com.github.premnirmal.ticker.navigation.HomeRoute
 import com.github.premnirmal.ticker.navigation.rememberScrollToTopAction
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.ticker.ui.fadingEdges
 import com.github.premnirmal.tickerwidget.R
+import org.koin.compose.koinInject
 
 /**
  * Android host for the shared [com.github.premnirmal.ticker.home.WatchlistContent]. Collects the
@@ -41,6 +42,7 @@ fun WatchlistContent(
         stringResource(R.string.updated_at, it.updatedString)
     }.orEmpty()
     val manageableWatchlists by viewModel.manageableWatchlists.collectAsState(emptyList())
+    val sparkProvider = koinInject<SparkProvider>()
     var showManage by remember { mutableStateOf(false) }
     var showNewWatchlist by remember { mutableStateOf(false) }
     WatchlistContent(
@@ -55,14 +57,21 @@ fun WatchlistContent(
         totalHoldingsIcon = painterResource(R.drawable.ic_money),
         onRefresh = viewModel::refresh,
         onQuoteClick = onQuoteClick,
-        quoteCard = { quote, cardModifier, interactionSource, onClick, onRemoveClick ->
-            QuoteCard(
-                modifier = cardModifier,
-                interactionSource = interactionSource,
-                quote = quote,
-                onClick = { onClick() },
-                showMore = true,
-                onRemoveClick = onRemoveClick,
+        prefetchSparks = { symbols -> sparkProvider.prefetch(symbols) },
+        quoteCard = { slot ->
+            val sparkData by sparkProvider.spark(slot.quote.symbol).collectAsState()
+            QuoteRow(
+                quote = slot.quote,
+                modifier = slot.modifier,
+                dragHandleModifier = slot.dragHandleModifier,
+                interactionSource = slot.interactionSource,
+                isEditing = slot.isEditing,
+                displayMode = slot.displayMode,
+                onClick = { slot.onClick() },
+                onLongClick = slot.onLongClick,
+                onRemoveClick = slot.onRemove,
+                onPillClick = slot.onPillClick,
+                sparkData = sparkData,
             )
         },
         totalHoldingsPopup = { totals, onDismiss ->

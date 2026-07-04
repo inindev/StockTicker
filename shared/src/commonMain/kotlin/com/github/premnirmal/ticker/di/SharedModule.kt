@@ -1,6 +1,7 @@
 package com.github.premnirmal.ticker.di
 
 import com.github.premnirmal.ticker.model.HistoryProvider
+import com.github.premnirmal.ticker.model.SparkProvider
 import com.github.premnirmal.ticker.network.CommitsProvider
 import com.github.premnirmal.ticker.network.NewsProvider
 import com.github.premnirmal.ticker.network.StocksApi
@@ -38,6 +39,7 @@ val sharedModule = module {
         )
     }
     single { HistoryProvider(chartApi = get()) }
+    single { SparkProvider(chartApi = get()) }
     single { SuggestionsProvider(stocksApi = get()) }
     single { PortfolioSerializer(json = get()) }
 }

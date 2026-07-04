@@ -67,7 +67,7 @@ open class SharedUserPreferences(
         store.setBoolean(SETTING_ROUND_TWO_DP, round)
     }
 
-    override fun notificationAlerts(): Boolean = store.getBoolean(SETTING_NOTIFICATION_ALERTS, true)
+    override fun notificationAlerts(): Boolean = store.getBoolean(SETTING_NOTIFICATION_ALERTS, false)
 
     override fun setNotificationAlerts(set: Boolean) {
         store.setBoolean(SETTING_NOTIFICATION_ALERTS, set)

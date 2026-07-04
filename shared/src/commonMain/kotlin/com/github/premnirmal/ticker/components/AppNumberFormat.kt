@@ -14,6 +14,7 @@ object AppNumberFormat {
 
     val DEFAULT: DecimalFormatter = DecimalFormatter(minFractionDigits = 2, maxFractionDigits = 4)
     val TWO_DP: DecimalFormatter = DecimalFormatter(minFractionDigits = 2, maxFractionDigits = 2)
+    val WHOLE: DecimalFormatter = DecimalFormatter(minFractionDigits = 0, maxFractionDigits = 0)
 
     /** Mirrors 'AppPreferences.roundToTwoDecimalPlaces()'; kept in sync by ':app'. */
     var roundToTwoDecimalPlaces: Boolean = true

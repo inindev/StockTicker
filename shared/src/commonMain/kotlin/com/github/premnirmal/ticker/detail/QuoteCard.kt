@@ -1,28 +1,16 @@
 package com.github.premnirmal.ticker.detail
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,44 +21,37 @@ import com.github.premnirmal.shared.resources.change_percent
 import com.github.premnirmal.shared.resources.day_change_amount
 import com.github.premnirmal.shared.resources.gain
 import com.github.premnirmal.shared.resources.holdings
-import com.github.premnirmal.shared.resources.ic_more
-import com.github.premnirmal.shared.resources.ic_remove_circle
 import com.github.premnirmal.shared.resources.loss
-import com.github.premnirmal.shared.resources.remove
 import com.github.premnirmal.ticker.network.data.Quote
 import com.github.premnirmal.tickerwidget.ui.AppCard
 import com.github.premnirmal.tickerwidget.ui.theme.SharedColours
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val QUOTE_MAX_LINES = 1
 
 /**
- * Shared (Compose Multiplatform) quote card rendered identically on Android and iOS. It shows the
- * symbol, name, last trade price and the change amount/percent, plus an optional overflow menu (the
- * three-dot [MoreIcon]) that lets the user remove the quote. Quotes that have holdings render the
- * richer [PositionCard] layout. All localized labels come from the shared string resources so the
- * card looks and reads the same on every platform.
+ * Shared (Compose Multiplatform) quote card rendered identically on Android and iOS (used by the
+ * Search/Trending/NewsFeed screens; the watchlist uses the row-style
+ * [com.github.premnirmal.ticker.home.QuoteRow]). It shows the symbol, name, last trade price and
+ * the change amount/percent. Quotes that have holdings render the richer [PositionCard] layout.
+ * All localized labels come from the shared string resources so the card looks and reads the same
+ * on every platform.
  */
 @Composable
 fun QuoteCard(
     quote: Quote,
     modifier: Modifier = Modifier,
     quoteNameMaxLines: Int = QUOTE_MAX_LINES,
-    interactionSource: MutableInteractionSource? = null,
     onClick: (Quote) -> Unit,
-    onRemoveClick: (Quote) -> Unit = {},
-    showMore: Boolean = false,
 ) {
     AppCard(
         modifier = modifier,
-        interactionSource = interactionSource,
         onClick = { onClick(quote) }
     ) {
         if (quote.hasPositions()) {
-            PositionCard(quote, onRemoveClick, showMore)
+            PositionCard(quote)
         } else {
-            InstrumentCard(quote, quoteNameMaxLines, onRemoveClick, showMore)
+            InstrumentCard(quote, quoteNameMaxLines)
         }
     }
 }
@@ -79,25 +60,12 @@ fun QuoteCard(
 private fun InstrumentCard(
     quote: Quote,
     quoteNameMaxLines: Int,
-    onRemoveClick: (Quote) -> Unit = {},
-    showMore: Boolean = false,
 ) {
     Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            QuoteSymbolText(
-                modifier = Modifier.weight(1f),
-                text = quote.symbol
-            )
-            if (showMore) {
-                MoreIcon(
-                    onClick = {
-                        onRemoveClick(quote)
-                    },
-                )
-            }
-        }
+        QuoteSymbolText(
+            modifier = Modifier.fillMaxWidth(),
+            text = quote.symbol
+        )
         QuoteNameText(modifier = Modifier.padding(top = 4.dp), text = quote.name, maxLines = quoteNameMaxLines)
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -128,8 +96,6 @@ private fun InstrumentCard(
 @Composable
 private fun PositionCard(
     quote: Quote,
-    onMoreClick: (Quote) -> Unit = {},
-    showMore: Boolean = false,
 ) {
     Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -139,13 +105,6 @@ private fun PositionCard(
                 text = quote.priceFormat.format(quote.lastTradePrice),
                 textAlign = TextAlign.End
             )
-            if (showMore) {
-                MoreIcon(
-                    onClick = {
-                        onMoreClick(quote)
-                    }
-                )
-            }
         }
         QuoteNameText(modifier = Modifier.padding(top = 4.dp), text = quote.name, maxLines = 1)
         Row(
@@ -310,46 +269,3 @@ fun SmallQuoteChangeText(
     )
 }
 
-@Composable
-private fun MoreIcon(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    var showPopup by rememberSaveable { mutableStateOf(false) }
-    Box {
-        IconButton(
-            modifier = modifier.size(16.dp),
-            onClick = {
-                showPopup = !showPopup
-            },
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_more),
-                contentDescription = null,
-            )
-        }
-        DropdownMenu(
-            expanded = showPopup,
-            onDismissRequest = {
-                showPopup = false
-            },
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 4.dp).clickable(role = Role.Button) {
-                    showPopup = false
-                    onClick()
-                }
-            ) {
-                Icon(
-                    modifier = Modifier.size(18.dp).padding(end = 4.dp),
-                    painter = painterResource(Res.drawable.ic_remove_circle),
-                    contentDescription = null,
-                )
-                Text(
-                    text = stringResource(Res.string.remove),
-                )
-            }
-        }
-    }
-}
