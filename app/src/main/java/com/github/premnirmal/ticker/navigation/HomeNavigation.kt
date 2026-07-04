@@ -17,7 +17,6 @@ import com.github.premnirmal.ticker.settings.SettingsScreen
 import com.github.premnirmal.ticker.ui.LocalContentType
 import com.github.premnirmal.ticker.widget.WidgetsScreen
 import org.koin.androidx.compose.koinViewModel
-import java.net.URLEncoder
 
 /**
  * Android-specific host for [HomeNavHost] that supplies the concrete screen composables
@@ -59,7 +58,7 @@ fun HomeNavHostWrapper(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface),
                 onQuoteClick = {
-                    rootNavController.navigate("${Graph.QUOTE_DETAIL}/${URLEncoder.encode(it.symbol, "UTF-8")}") {
+                    rootNavController.navigate(Graph.quoteDetail(it.symbol)) {
                         popUpTo(HomeRoute.Trending.route) {
                             inclusive = true
                         }
@@ -75,7 +74,7 @@ fun HomeNavHostWrapper(
                 widthSizeClass = widthSizeClass,
                 displayFeatures = displayFeatures,
                 onQuoteClick = {
-                    rootNavController.navigate("${Graph.QUOTE_DETAIL}/${URLEncoder.encode(it.symbol, "UTF-8")}") {
+                    rootNavController.navigate(Graph.quoteDetail(it.symbol)) {
                         popUpTo(HomeRoute.Search.route) {
                             inclusive = true
                         }

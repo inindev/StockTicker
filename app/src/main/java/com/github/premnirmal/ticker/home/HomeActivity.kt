@@ -66,7 +66,7 @@ class HomeActivity : BaseActivity() {
         )
         LaunchedEffect(Unit) {
             intent.getStringExtra(EXTRA_SYMBOL)?.let {
-                navHostController.navigate(route = "${Graph.QUOTE_DETAIL}/$it")
+                navHostController.navigate(route = Graph.quoteDetail(it))
             }
         }
         LaunchedEffect(appPreferences.getLastSavedVersionCode(), appPreferences.tutorialShown()) {

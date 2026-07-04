@@ -174,21 +174,21 @@ private fun HomeContent(
                                     WatchlistPane(
                                         contentType = contentType,
                                         onQuoteClick = { quote ->
-                                            rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                                            rootNavController.navigate(Graph.quoteDetail(quote.symbol))
                                         }
                                     )
                                 },
                                 trending = {
                                     TrendingScreen(
                                         onQuoteClick = { quote ->
-                                            rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                                            rootNavController.navigate(Graph.quoteDetail(quote.symbol))
                                         }
                                     )
                                 },
                                 search = {
                                     SearchScreen(
                                         onQuoteClick = { quote ->
-                                            rootNavController.navigate("${Graph.QUOTE_DETAIL}/${quote.symbol}")
+                                            rootNavController.navigate(Graph.quoteDetail(quote.symbol))
                                         }
                                     )
                                 },
